@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env*
+!.env.example
+.netlify/
+*.tsbuildinfo
+03_Supabase/
+seed-data.json
+*private*.sql
+
+.qa/

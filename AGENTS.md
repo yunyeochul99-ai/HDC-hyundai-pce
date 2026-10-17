@@ -1,0 +1,20 @@
+# HDC PCE 작업 지침
+
+## 업그레이드 기준 저장소
+
+사용자 지정(2026-10-17): 이후 추가 기능, 수정, 업그레이드는 `https://github.com/yunyeochul99-ai/HDC-hyundai-pce`의 `main`을 기준으로 진행합니다.
+
+- 이 저장소를 최신 소스의 기준으로 사용합니다. 기존 `yunyeochul99-ai/HDC-PCE`에 업그레이드를 반영하지 않습니다.
+- 작업 전 원격 `main`의 최신 상태를 확인하고 사용자 변경을 보존합니다. 강제 푸시하지 않습니다.
+- 현재 운영 주소는 `https://hdc-pce.netlify.app`입니다. GitHub 소스 반영과 Netlify 배포 성공 여부는 각각 확인하고 보고합니다.
+- Supabase 프로젝트 `mfqnaopqlerqddyomscv`와 기존 계정·기록·사진·추가 점검 양식을 유지합니다. 저장소 이름 변경을 이유로 DB를 초기화하거나 재설치하지 않습니다.
+- 실제 회사 기준자료·수선비 원장·운영 백업·사진·비공개 SQL·secret/service role key를 공개 저장소에 올리지 않습니다. `public-config.ts`에는 기존 브라우저용 공개 연결 설정만 둡니다.
+- 검증은 변경에 맞춰 수행합니다. 앱 코드 변경 시 TypeScript 검사와 프로덕션 빌드를 확인합니다.
+
+## 기본 배포 구성
+
+- Node 22, pnpm (`packageManager`와 잠금 파일 기준)
+- 빌드: `pnpm run build`
+- 배포 폴더: `dist`
+- 설정: 루트 `netlify.toml`
+- GitHub 저장소를 연결하는 것만으로 Netlify의 자동 배포 원본이 변경되지는 않습니다. 실제 Netlify 연결 상태를 확인하기 전 변경 완료라고 보고하지 않습니다.
