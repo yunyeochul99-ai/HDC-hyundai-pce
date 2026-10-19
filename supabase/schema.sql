@@ -139,6 +139,8 @@ declare
   v_item jsonb;
   v_items jsonb := '[]'::jsonb;
   v_photos jsonb;
+  v_detail record;
+  v_details jsonb := '{}'::jsonb;
   v_checked_date date;
   v_defect boolean := false;
 begin
@@ -146,7 +148,7 @@ begin
     raise exception using errcode='22023',message='기록은 256KB 이하 JSON 객체여야 합니다.';
   end if;
   if exists(select 1 from jsonb_object_keys(v_record) k where k not in
-    ('id','type','equipmentId','equipmentName','title','status','priority','assignee','date','dueDate','note','items','photoIds','version','createdAt','updatedAt')) then
+    ('id','type','equipmentId','equipmentName','title','status','priority','assignee','date','dueDate','note','items','photoIds','photoDetails','version','createdAt','updatedAt')) then
     raise exception using errcode='22023',message='허용되지 않은 기록 필드가 있습니다.';
   end if;
   foreach v_key in array array['id','type','equipmentId','equipmentName','title','status','priority','assignee','date']
@@ -259,6 +261,15 @@ begin
     or (select count(*) from jsonb_array_elements_text(v_photos)) <> (select count(distinct value) from jsonb_array_elements_text(v_photos)) then
     raise exception using errcode='22023',message='사진은 중복 없이 올바른 식별자 최대 5개여야 합니다.';
   end if;
+  if v_record ? 'photoDetails' then
+    if jsonb_typeof(v_record->'photoDetails') is distinct from 'object' then raise exception using errcode='22023',message='사진 분류는 객체여야 합니다.';end if;
+    for v_detail in select key,value from jsonb_each(v_record->'photoDetails') loop
+      if not (v_photos ? v_detail.key) or jsonb_typeof(v_detail.value) is distinct from 'object' then raise exception using errcode='22023',message='첨부된 사진의 분류만 저장할 수 있습니다.';end if;
+      if exists(select 1 from jsonb_object_keys(v_detail.value) k where k not in ('stage','part','caption')) or jsonb_typeof(v_detail.value->'stage') is distinct from 'string' or v_detail.value->>'stage' not in ('before','after','unclassified') or jsonb_typeof(v_detail.value->'part') is distinct from 'string' or char_length(v_detail.value->>'part')>100 or jsonb_typeof(v_detail.value->'caption') is distinct from 'string' or char_length(v_detail.value->>'caption')>500 then raise exception using errcode='22023',message='사진 구분·부위(100자)·설명(500자)을 확인하세요.';end if;
+      v_details:=v_details||jsonb_build_object(v_detail.key,jsonb_build_object('stage',v_detail.value->>'stage','part',btrim(v_detail.value->>'part'),'caption',btrim(v_detail.value->>'caption')));
+    end loop;
+    v_record:=v_record||jsonb_build_object('photoDetails',v_details);
+  end if;
   return jsonb_set(v_record,'{photoIds}',v_photos);
 end;
 $fn$;
@@ -301,6 +312,10 @@ begin
       detail=case when v_found then v_existing.body::text else 'null' end,
       hint='최신 기록을 확인하고 변경 내용을 비교한 뒤 다시 저장하세요.';
   end if;
+  -- Older clients omit classification; retain metadata for photographs still attached.
+  if v_found and not (p_record ? 'photoDetails') and v_existing.body ? 'photoDetails' then
+    v_record:=v_record||jsonb_build_object('photoDetails',(select coalesce(jsonb_object_agg(d.key,d.value),'{}'::jsonb) from jsonb_each(v_existing.body->'photoDetails') d where (v_record->'photoIds') ? d.key));
+  end if;
   if exists(
     select 1 from jsonb_array_elements_text(v_record->'photoIds') p(id)
     where not exists(select 1 from public.hdc_v2_photos f where f.id=p.id::uuid)
@@ -335,7 +350,7 @@ begin
       'title',left('[이상점검] ' || (v_saved->>'title'),200),'status','접수',
       'priority',case when v_saved->>'priority'='긴급' then '긴급' else '높음' end,
       'assignee',v_saved->>'assignee','date',v_saved->>'date','dueDate',v_saved->>'dueDate',
-      'note',v_defect_note,'items','[]'::jsonb,'photoIds',v_saved->'photoIds','version',1,
+      'note',v_defect_note,'items','[]'::jsonb,'photoIds',v_saved->'photoIds','photoDetails',coalesce(v_saved->'photoDetails','{}'::jsonb),'version',1,
       'createdAt',v_now_text,'updatedAt',v_now_text
     );
     -- Same transaction as the inspection; an existing follow-up, including a completed one, is never overwritten.

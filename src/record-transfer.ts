@@ -18,6 +18,7 @@ export async function transferRecord<T extends { photoIds: string[] }>(options: 
   save: (record: T) => Promise<T>;
   onProgress: (status: TransferStatus) => void;
   onStaged: (record: T, uploaded: number) => void;
+  onPhotoUploaded?: (record: T, file: File, id: string) => T;
 }): Promise<T> {
   let staged = { ...options.record, photoIds: [...options.record.photoIds] };
   const total = options.files.length + 1;
@@ -25,6 +26,7 @@ export async function transferRecord<T extends { photoIds: string[] }>(options: 
     options.onProgress({ phase: 'uploading', completed: index, total, message: `사진 ${index + 1}/${options.files.length}장 업로드 중` });
     const id = await options.upload(options.files[index]);
     staged = { ...staged, photoIds: [...staged.photoIds, id] };
+    if (options.onPhotoUploaded) staged = options.onPhotoUploaded(staged, options.files[index], id);
     options.onStaged(staged, index + 1);
   }
   options.onProgress({ phase: 'saving', completed: options.files.length, total, message: '기록과 사진 연결을 서버에 저장하고 있습니다.' });
@@ -39,4 +41,3 @@ export async function withTimeout<T>(operation: Promise<T>, milliseconds = 15000
     return await Promise.race([operation, new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error('서버 응답 확인 시간 초과')), milliseconds); })]);
   } finally { if (timer) clearTimeout(timer); }
 }
-

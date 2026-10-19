@@ -8,6 +8,26 @@ const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.Scri
 const { transferRecord, withTimeout } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
 const photos = () => [new File(['first'], 'first.png'), new File(['second'], 'second.png')];
 
+test('photo categories and captions survive partial uploads and retry without mixing files', async () => {
+  let staged={photoIds:[],photoDetails:{}},uploaded=0;
+  const metadata={ 'first.png':{stage:'before',part:'wire',caption:'damaged'},'second.png':{stage:'after',part:'wire',caption:'replaced'} };
+  const attach=(record,file,id)=>({...record,photoDetails:{...record.photoDetails,[id]:metadata[file.name]}});
+  await assert.rejects(transferRecord({record:staged,files:photos(),upload:async file=>{if(file.name==='second.png')throw Error('interrupted');return 'first-id';},save:async()=>assert.fail('must not save'),onProgress:()=>{},onPhotoUploaded:attach,onStaged:(record,count)=>{staged=record;uploaded=count;}}),/interrupted/);
+  assert.deepEqual(staged.photoDetails,{'first-id':metadata['first.png']});
+  const saved=await transferRecord({record:staged,files:photos().slice(uploaded),upload:async()=> 'second-id',save:async record=>record,onProgress:()=>{},onPhotoUploaded:attach,onStaged:()=>{}});
+  assert.deepEqual(saved.photoDetails,{'first-id':metadata['first.png'],'second-id':metadata['second.png']});
+});
+
+test('legacy photos default to unclassified and detached metadata is excluded from saved record', async () => {
+  const source=await readFile(new URL('../src/photo-details.ts',import.meta.url),'utf8');
+  const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+  const {attachedPhotoDetails,photoDetail}=await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
+  assert.equal(photoDetail(undefined,'legacy-id').stage,'unclassified');
+  const details={'keep':{stage:'after',part:'wire',caption:'replaced'},'removed':{stage:'before',part:'wire',caption:'damaged'}};
+  assert.deepEqual(attachedPhotoDetails(['keep'],details),{keep:details.keep});
+  assert.equal(details.removed.stage,'before');
+});
+
 test('uploads photos in order, saves references, then confirms server acknowledgement', async () => {
   const record = { photoIds: ['existing'], title: 'test' }, states = [], staged = [];
   const saved = await transferRecord({ record, files: photos(), upload: async file => file.name, save: async value => ({ ...value, version: 2 }), onProgress: state => states.push(state), onStaged: (value, count) => staged.push({ value, count }) });
@@ -49,4 +69,3 @@ test('server query timeout rejects and quick queries resolve normally', async ()
   await assert.rejects(withTimeout(new Promise(() => {}), 1), /시간 초과/);
   assert.equal(await withTimeout(Promise.resolve('confirmed'), 100), 'confirmed');
 });
-
