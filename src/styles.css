@@ -140,3 +140,19 @@ td b{color:#48616f;font-weight:600}tbody tr[tabindex]{cursor:pointer}.empty>svg{
 .modal form .modal-body>label,.modal form .record-photos{padding:12px;border:1px solid #9ebfe7;border-radius:8px;background:#eaf3ff}
 .modal form .record-photos-heading h3{color:#24486c}
 
+
+/* Visible responsibility zones on the work-planning landing page. */
+.planning-zone-guide{font-size:12px;color:#425363;line-height:1.8;margin:0 0 18px}
+.planning-zone-label{font-size:11px;font-weight:700;line-height:1.7;margin:0 0 12px}
+.planning-lane.planning-lane-facilities{background:#eaf3ff;border-color:#9ebfe7;color:#24486c}
+.planning-lane.planning-lane-facilities header,.planning-lane.planning-lane-facilities>p{color:#24486c}
+.planning-lane.planning-lane-approver{background:#edf8f1;border-color:#a8d4b8;color:#235d39}
+.planning-lane.planning-lane-approver header,.planning-lane.planning-lane-approver>p{color:#235d39}
+.facility-operations-zone{padding:18px;margin:20px 0 28px;border:1px solid #9ebfe7;border-radius:9px;background:#eaf3ff;color:#24486c}
+.facility-operations-zone>.card{margin-bottom:0}
+.preventive-owner-heading{padding:14px 16px;border:1px solid #a8d4b8;border-radius:7px;background:#edf8f1;color:#235d39;font-size:12px;font-weight:700;line-height:1.8}
+.preventive-manager .pm-editor.card.role-zone-approver{background:#edf8f1;border-color:#a8d4b8}
+.preventive-manager .pm-editor.card.preventive-draft-zone{background:#eaf3ff;border-color:#9ebfe7}
+.preventive-manager .role-approval-button{background:#edf8f1;border-color:#a8d4b8;color:#235d39}
+@media(max-width:600px){.facility-operations-zone{padding:12px}.planning-zone-guide{font-size:11px}}
+
