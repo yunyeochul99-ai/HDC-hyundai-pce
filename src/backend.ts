@@ -72,7 +72,7 @@ export function readableError(error: unknown): string {
   const message = e.message || '';
   if (e.code === 'PT409' || /VERSION_CONFLICT/.test(message)) return '다른 기기에서 변경된 기록입니다. 최신 기록과 비교한 뒤 다시 저장하세요.';
   if (/Invalid login credentials/i.test(message) || e.code === 'invalid_credentials') return '아이디 또는 이메일과 비밀번호를 확인하세요.';
-  if (/Email not confirmed/i.test(message) || e.code === 'email_not_confirmed') return '가입 확인 이메일의 링크를 누른 뒤 로그인하세요.';
+  if (/Email not confirmed/i.test(message) || e.code === 'email_not_confirmed') return '서버의 이메일 인증 설정으로 로그인이 차단되었습니다. 관리자에게 가입 설정 확인을 요청하세요. 업무 자료는 관리자 승인 후 이용할 수 있습니다.';
   if (/already registered|already been registered/i.test(message) || e.code === 'user_already_exists') return '이미 가입된 이메일입니다. 로그인 화면에서 접속하세요.';
   if (/rate limit|too many requests|over_email_send_rate_limit|over_request_rate_limit/i.test(`${e.code} ${message}`)) return '요청이 많습니다. 잠시 후 다시 시도하세요.';
   if (/Password should|weak password/i.test(message) || e.code === 'weak_password') return '비밀번호는 8자 이상으로 입력하고 안내된 비밀번호 기준을 확인하세요.';
@@ -261,3 +261,4 @@ export function validateSeed(value: unknown): asserts value is JsonObject {
   sources.forEach((entry) => requireStrings(entry, ['id', 'path'], '원본 출처'));
   if (!Array.isArray(value.meta.notes) || value.meta.notes.some((note) => typeof note !== 'string')) throw new Error('기준자료 확인 사항을 확인하세요.');
 }
+

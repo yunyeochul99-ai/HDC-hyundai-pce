@@ -385,12 +385,12 @@ export default function AuthGate({ children }: { children: (context: AuthContext
         if (result.error) throw result.error;
         setNotice('등록된 이메일이면 재설정 링크가 발송됩니다. 받은편지함과 스팸함을 확인하세요. 메일이 오지 않으면 운영자에게 문의하세요.');
       } else if (mode === 'signup') {
-        if (!isRealEmail(value)) throw new Error('새 계정은 확인 메일을 받을 수 있는 실제 이메일로 가입하세요.');
+        if (!isRealEmail(value)) throw new Error('새 계정은 본인의 실제 이메일로 가입하세요.');
         if (!displayName.trim()) throw new Error('이름을 입력하세요.');
         if (password.length < 8) throw new Error('비밀번호를 8자 이상 입력하세요.');
         const result = await supabase.auth.signUp({ email: value, password, options: { data: { display_name: displayName.trim() }, emailRedirectTo: window.location.origin } });
         if (result.error) throw result.error;
-        setNotice(result.data.session ? '가입되었습니다. 관리자 승인 후 업무 화면을 사용할 수 있습니다.' : '가입 확인 이메일을 확인하세요. 이메일 확인과 관리자 승인 후 로그인할 수 있습니다.');
+        setNotice(result.data.session ? '가입 요청이 접수되었습니다. 이메일 인증 없이 관리자 승인 후 업무 화면을 사용할 수 있습니다.' : '가입 요청이 접수되었습니다. 관리자 승인 후 로그인하세요. 이메일 인증 안내가 계속 나오면 관리자에게 서버의 가입 설정을 확인해 달라고 요청하세요.');
         setPassword('');
       } else {
         const email = value.includes('@') ? value : `${value.toLowerCase()}@hdc-pce.netlify.app`;
@@ -435,3 +435,4 @@ export default function AuthGate({ children }: { children: (context: AuthContext
     </section>
   </main>;
 }
+
