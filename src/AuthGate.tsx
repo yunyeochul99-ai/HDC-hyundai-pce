@@ -415,7 +415,7 @@ export default function AuthGate({ children }: { children: (context: AuthContext
     setPassword('');
   };
   return <main className="auth-screen">
-    <section className="auth-intro"><div className="auth-brand"><BrandLogo /></div><span className="auth-eyebrow">설비보전 통합관리</span><h1>현장 기록을<br /><strong>다음 조치로 연결합니다.</strong></h1><p>표준 점검과 정비 작업, 설비 이력과 수선비를<br />공장 업무 공간에서 함께 확인하세요.</p><div className="auth-intro-note"><span className="auth-dot" />승인된 공장 팀을 위한 업무 공간</div></section>
+    <section className="auth-intro"><div className="auth-brand"><BrandLogo /></div><span className="auth-eyebrow">설비보전 통합관리</span><h1>현장 기록으로<br /><strong>점검과 정비를 이어갑니다.</strong></h1><p>표준 점검과 정비 작업, 설비 이력과 수선비를<br />공장 업무 공간에서 함께 확인하세요.</p><div className="auth-intro-note"><span className="auth-dot" />승인된 공장 팀을 위한 업무 공간</div></section>
     <section className="auth-card">
       <span className="auth-eyebrow">WELCOME TO HDC PCE</span>
       <h2>{mode === 'signin' ? '업무 공간 로그인' : mode === 'signup' ? '계정 가입 요청' : '비밀번호 재설정'}</h2>
@@ -435,4 +435,5 @@ export default function AuthGate({ children }: { children: (context: AuthContext
     </section>
   </main>;
 }
+
 
