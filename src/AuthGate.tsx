@@ -178,7 +178,7 @@ export function AdminPanel({ onClose, onProfileChanged }: { onClose: () => void;
 }
 
 function AccountPanel({ user, profile, onClose, onSaved, signOut }: { user: User; profile: Profile; onClose: () => void; onSaved: (profile: Profile) => void; signOut: () => Promise<void> }) {
-  const [name, setName] = useState(profile.display_name === '짱구' ? '윤공장장' : profile.display_name || '');
+  const [name, setName] = useState(profile.display_name || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [nextPassword, setNextPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -405,7 +405,7 @@ export default function AuthGate({ children }: { children: (context: AuthContext
   if (session && recoveryAccount === session.user.id) return <PasswordRecoveryPanel user={session.user} onSignOut={() => signOut(true)} onDone={() => { setRecoveryAccount(null); rememberRecoveryAccount(null); void loadProfile(session.user.id); }} />;
   if (loading) return <main className="auth-screen"><section className="auth-card auth-status-card"><BrandLogo className="status-logo" /><h1>설비보전 업무 공간</h1><p>로그인과 계정 승인을 확인하고 있습니다.</p></section></main>;
   const accountPanel = session && profile && accountOpen ? <AccountPanel user={session.user} profile={profile} onClose={() => setAccountOpen(false)} signOut={() => signOut(true)} onSaved={(saved) => { setProfile(saved); setAccessProfile(saved); }} /> : null;
-  const displayedProfile = profile?.display_name === '짱구' ? { ...profile, display_name: '윤공장장' } : profile;
+  const displayedProfile = profile;
   if (session && profile?.approved === true && displayedProfile) return <>{children({ user: session.user, profile: displayedProfile, signOut, openAdmin: () => { if (profile.is_admin === true) setAdminOpen(true); }, openAccount: () => setAccountOpen(true) })}{adminOpen && profile.is_admin === true && <AdminPanel onClose={() => setAdminOpen(false)} onProfileChanged={() => { if (account.current) void loadProfile(account.current, false); }} />}{accountPanel}</>;
   if (session) return <><main className="auth-screen"><section className="auth-card auth-status-card"><BrandLogo className="status-logo" /><span className="auth-eyebrow">HDC PCE MAINTENANCE</span><h1>{profile ? '관리자 승인 대기' : '계정 확인이 필요합니다'}</h1><p>{profile ? '가입한 계정이 아직 승인되지 않았습니다. 관리자가 승인하면 공장 업무 자료를 사용할 수 있습니다.' : '업무 자료를 열기 위한 계정 프로필을 확인해 주세요.'}</p><div className="auth-account-label">{displayedProfile?.display_name || session.user.email || '로그인한 계정'}</div>{error && <p className="auth-error" role="alert">{error}</p>}<div className="auth-button-row"><button type="button" className="auth-primary" onClick={() => void loadProfile(session.user.id)}>승인 상태 새로고침</button>{profile && <button type="button" className="auth-secondary" onClick={() => setAccountOpen(true)}>계정 설정</button>}<button type="button" className="auth-secondary" onClick={() => void signOut()}>로그아웃</button></div></section></main>{accountPanel}</>;
   const switchMode = (nextMode: 'signin' | 'signup' | 'reset') => {
@@ -435,3 +435,4 @@ export default function AuthGate({ children }: { children: (context: AuthContext
     </section>
   </main>;
 }
+
