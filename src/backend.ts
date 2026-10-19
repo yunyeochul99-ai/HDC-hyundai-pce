@@ -6,7 +6,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storageKey: 'hdc-pce-v2-auth',
+    storageKey: 'hdc-pce-v2-auth-pcaporgqhzzwzfgkxars',
   },
 });
 

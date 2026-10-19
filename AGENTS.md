@@ -6,8 +6,8 @@
 
 - 이 저장소를 최신 소스의 기준으로 사용합니다. 기존 `yunyeochul99-ai/HDC-PCE`에 업그레이드를 반영하지 않습니다.
 - 작업 전 원격 `main`의 최신 상태를 확인하고 사용자 변경을 보존합니다. 강제 푸시하지 않습니다.
-- 현재 운영 주소는 `https://hdc-pce.netlify.app`입니다. GitHub 소스 반영과 Netlify 배포 성공 여부는 각각 확인하고 보고합니다.
-- Supabase 프로젝트 `mfqnaopqlerqddyomscv`와 기존 계정·기록·사진·추가 점검 양식을 유지합니다. 저장소 이름 변경을 이유로 DB를 초기화하거나 재설치하지 않습니다.
+- 현재 운영 주소는 `https://hdc-hyundai-pce.netlify.app`입니다. GitHub 소스 반영과 Netlify 배포 성공 여부는 각각 확인하고 보고합니다.
+- 사용자 지정(2026-10-19): 운영 Supabase는 `pcaporgqhzzwzfgkxars`로 이전했습니다. 기존 계정·기록·사진·추가 점검 양식을 유지합니다. 원본 `mfqnaopqlerqddyomscv`는 보존용이며 임의로 운영 연결을 되돌리지 않습니다. 저장소 이름 변경을 이유로 DB를 초기화하거나 재설치하지 않습니다.
 - 실제 회사 기준자료·수선비 원장·운영 백업·사진·비공개 SQL·secret/service role key를 공개 저장소에 올리지 않습니다. `public-config.ts`에는 기존 브라우저용 공개 연결 설정만 둡니다.
 - 검증은 변경에 맞춰 수행합니다. 앱 코드 변경 시 TypeScript 검사와 프로덕션 빌드를 확인합니다.
 
