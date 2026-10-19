@@ -3,6 +3,7 @@ import AuthGate from './AuthGate';
 import Workspace from './Workspace';
 import './styles.css';
 import './auth.css';
+import './brand.css';
 
 createRoot(document.getElementById('root')!).render(
   <AuthGate>{({user,profile,signOut,openAdmin,openAccount})=>
