@@ -10,8 +10,8 @@
 | --- | --- |
 | 공개 저장소 | [yunyeochul99-ai/HDC-hyundai-pce](https://github.com/yunyeochul99-ai/HDC-hyundai-pce) |
 | 배포 브랜치 | `main` |
-| 앱 URL | [hdc-pce.netlify.app](https://hdc-pce.netlify.app) |
-| Supabase 프로젝트 URL | `https://mfqnaopqlerqddyomscv.supabase.co` |
+| 앱 URL | [hdc-hyundai-pce.netlify.app](https://hdc-hyundai-pce.netlify.app) |
+| Supabase 프로젝트 URL | `https://pcaporgqhzzwzfgkxars.supabase.co` |
 | Node | `22` 이상, 패키지 요구 버전 `22.13.0` 이상 |
 | 패키지 관리 | `pnpm` · `pnpm-lock.yaml` 포함 |
 | 빌드 / 배포 폴더 | `pnpm run build` / `dist` |
@@ -43,7 +43,7 @@ pnpm run preview
 
 ## 계정과 저장 권한
 
-기존 아이디는 `아이디@hdc-pce.netlify.app` 형태의 기존 Supabase 계정으로 로그인합니다. 신규 가입은 실제 이메일을 사용하고 이메일 확인·공장 관리자 승인을 거칩니다. Google 계정 로그인과는 별개입니다.
+기존 아이디는 `아이디@hdc-pce.netlify.app` 형태의 기존 Supabase 계정으로 로그인합니다. 신규 가입은 실제 이메일을 사용하고 공장 관리자 승인을 거칩니다. 이메일 확인·재설정 메일은 운영용 SMTP 설정 후 사용하며, 현재는 로그인 후 직접 비밀번호 변경을 우선 사용합니다. Google 계정 로그인과는 별개입니다.
 
 승인된 공장 구성원은 공장 기준자료, 점검·작업 기록과 현장 사진을 조회합니다. 기록 수정은 작성자 또는 관리자만 수행합니다. 관리자만 사용자 승인과 기준자료 가져오기를 수행하며 첫 가입자에게 관리자 권한을 자동 부여하지 않습니다. 앱 프로필의 표시 이름은 계정 설정에서 `윤공장장` 등으로 변경합니다.
 
@@ -73,7 +73,7 @@ pnpm run preview
 
 ## 설비보전 정책과 작업계획 (3.1)
 
-설비보전 절차서에서 여섯 가지 목적과 부서 정책을 확인합니다. 평일 08:00~09:30, 주말 계획 제외, 90분 초과 장기 및 100만 원 이상 고액 특별관리 기준을 반영했습니다. 보전 작업계획에서 시간·비용·영향·관리자 승인과 복구 확인을 기록합니다.
+설비보전 절차서에서 여섯 가지 목적과 부서 정책을 확인합니다. 월요일~토요일 08:00~09:30 활용, 일요일 일반 작업 제외 및 긴급사후보전 별도 승인, 90분 초과 장기 및 100만 원 이상 고액 특별관리 기준을 반영했습니다. 보전 작업계획에서 시간·비용·영향·관리자 승인과 복구 확인을 기록합니다.
 
 새 DB를 설치할 때 supabase/schema.sql → supabase/storage.sql → supabase/maintenance.sql 순서로 적용합니다. 마지막 maintenance.sql은 새 계획 테이블과 정책·승인·완료 규칙을 적용하므로 생략하지 않습니다. 제조원가 비율은 같은 월의 실제비용 입력 상태를 확인한 뒤 사용합니다.
 
@@ -87,15 +87,23 @@ pnpm run preview
 
 이 저장소에는 기존 운영 앱 3.2.0의 앱 소스, PWA 아이콘, 빌드 설정과 DB 구조 SQL을 적용했습니다. 기준 소스는 [HDC-PCE의 f45e84a](https://github.com/yunyeochul99-ai/HDC-PCE/commit/f45e84a032af962a7d144eb4719f8c03f9bb7875)입니다. 앱 실행 파일과 Supabase 연결 설정은 기준 소스와 같습니다. 보전 절차서, 작업계획, 100만 원 이상 특별관리, 새 장비·점검 양식 추가 기능을 포함합니다.
 
-기존 Netlify 앱과 같은 Supabase 프로젝트를 사용하므로 기존 계정·기록·사진·추가 양식을 그대로 조회합니다. 저장소를 바꾸기 위해 기존 DB를 재설치하거나 SQL을 다시 실행할 필요는 없습니다. 회사 원장과 운영 데이터는 이 공개 저장소에 포함하지 않았습니다.
+2026-10-19 운영 사이트는 `hdc-hyundai-pce.netlify.app`, Supabase는 `pcaporgqhzzwzfgkxars`로 이전했습니다. 기존 계정·기록·사진·추가 양식을 보존하며, 이전 서버는 보존용입니다. 운영 DB를 초기화하거나 설치 SQL을 재실행하지 않습니다. 회사 원장과 운영 데이터는 이 공개 저장소에 포함하지 않았습니다.
 
 ### 기존 Netlify 사이트의 자동 배포 원본 변경
 
 GitHub 코드 반영과 Netlify 저장소 연결은 별도 작업입니다. 이 저장소에 코드를 반영한 것만으로 기존 사이트의 자동 배포 원본이 변경되지는 않습니다.
 
-1. Netlify에서 기존 `hdc-pce` 프로젝트를 선택합니다.
+1. Netlify에서 운영 `hdc-hyundai-pce` 프로젝트를 선택합니다.
 2. 프로젝트의 Build & deploy 설정에서 연결된 저장소를 `yunyeochul99-ai/HDC-hyundai-pce`로 변경하고 브랜치를 `main`으로 지정합니다.
 3. Base directory는 비워 두고, build command는 `pnpm run build`, publish directory는 `dist`로 설정합니다. Node 22 설정은 `netlify.toml`에 포함되어 있습니다.
-4. 새 배포가 성공하면 기존 `https://hdc-pce.netlify.app` 주소에서 로그인과 기록·사진 조회를 확인합니다. 기존 사이트 주소와 Supabase 프로젝트는 유지합니다.
+4. 새 배포가 성공하면 `https://hdc-hyundai-pce.netlify.app`에서 로그인과 기록·사진 조회를 확인합니다. 로그인에 사용하는 기존 `아이디@hdc-pce.netlify.app` 계정 식별자는 사이트 주소와 구분하며 임의로 변경하지 않습니다.
 
 폰과 PC에서 기존 주소를 사용하면 됩니다. 새 GitHub 저장소 주소는 앱 접속 주소가 아닙니다.
+
+## 현재 운영 기능
+
+- 사진은 보수 전·보수 후·미분류로 구분하고 부위·설명을 기록합니다. 기존 사진은 미분류로 보존하며, 전후 비교는 저장된 기록에서 확인합니다.
+- 예방정비 계획은 추가 후 승인 대기로 등록합니다. 편집·삭제·승인·반려·복원은 지정된 본인 계정만 수행하며, 삭제된 계획과 기존 작업 기록을 보존합니다.
+- 운영 CSV의 사진 분류·설명·보기 링크는 지정된 본인 관리자 계정에만 포함됩니다. 다른 구성원의 CSV에서는 사진 정보가 제외되며, CSV 사진 링크는 본인 관리자 로그인 후에만 열립니다. 원본 Storage 주소나 서명 토큰을 CSV에 넣지 않습니다.
+
+신규 개발 DB는 기본 구조 SQL 이후 `supabase/migrations`를 생성 순서대로 검토·적용해야 현재 기능과 일치합니다. 전용 승인자 설정 전에는 승인된 관리자 1명을 지정해야 합니다. 이미 적용된 운영 DB에는 설치 스크립트를 재실행하지 않습니다.

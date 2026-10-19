@@ -148,7 +148,7 @@ begin
     raise exception using errcode='22023',message='기록은 256KB 이하 JSON 객체여야 합니다.';
   end if;
   if exists(select 1 from jsonb_object_keys(v_record) k where k not in
-    ('id','type','equipmentId','equipmentName','title','status','priority','assignee','date','dueDate','note','items','photoIds','photoDetails','version','createdAt','updatedAt')) then
+    ('id','type','equipmentId','equipmentName','title','status','priority','assignee','date','dueDate','note','items','photoIds','photoDetails','preventivePlanId','version','createdAt','updatedAt')) then
     raise exception using errcode='22023',message='허용되지 않은 기록 필드가 있습니다.';
   end if;
   foreach v_key in array array['id','type','equipmentId','equipmentName','title','status','priority','assignee','date']
@@ -270,6 +270,7 @@ begin
     end loop;
     v_record:=v_record||jsonb_build_object('photoDetails',v_details);
   end if;
+  if v_record ? 'preventivePlanId' and (v_record->>'type'<>'workorder' or jsonb_typeof(v_record->'preventivePlanId') is distinct from 'string' or char_length(btrim(v_record->>'preventivePlanId')) not between 1 and 100) then raise exception using errcode='22023',message='예방정비 계획 연결을 확인하세요.';end if;
   return jsonb_set(v_record,'{photoIds}',v_photos);
 end;
 $fn$;
@@ -312,6 +313,7 @@ begin
       detail=case when v_found then v_existing.body::text else 'null' end,
       hint='최신 기록을 확인하고 변경 내용을 비교한 뒤 다시 저장하세요.';
   end if;
+  if v_found and not (p_record ? 'preventivePlanId') and v_existing.body ? 'preventivePlanId' then v_record:=v_record||jsonb_build_object('preventivePlanId',v_existing.body->'preventivePlanId');end if;
   -- Older clients omit classification; retain metadata for photographs still attached.
   if v_found and not (p_record ? 'photoDetails') and v_existing.body ? 'photoDetails' then
     v_record:=v_record||jsonb_build_object('photoDetails',(select coalesce(jsonb_object_agg(d.key,d.value),'{}'::jsonb) from jsonb_each(v_existing.body->'photoDetails') d where (v_record->'photoIds') ? d.key));

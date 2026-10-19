@@ -1,6 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import AuthGate from './AuthGate';
-import Workspace from './Workspace';
+import Workspace from './PhotoExport';
 import './styles.css';
 import './auth.css';
 import './brand.css';
@@ -15,4 +15,3 @@ createRoot(document.getElementById('root')!).render(
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 }
-
