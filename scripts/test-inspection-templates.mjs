@@ -21,3 +21,8 @@ test('missing standards are explicit field-review drafts and source arrays are n
  for(const form of periodicTemplates(catalog)){assert.ok(form.items.length>0);assert.match(form.items[0].criteria,/현장 확인 필요/);assert.match(form.items[0].criteria,/미등록/);}
  assert.equal(JSON.stringify(catalog),before);
 });
+
+test('daily autonomous-maintenance wording does not become a weekly standard',()=>{
+ const forms=periodicTemplates({equipment:[{id:'EQ',name:'Equipment'}],checklists:[{id:'DAILY',equipment:'EQ',title:'Daily',cycle:'일일 시업 전(자주보전 DM)',items:[{id:'D',name:'Daily only',criteria:'Daily standard'}]},{id:'WEEK',equipment:'EQ',title:'Weekly',cycle:'주간/월간 정밀',items:[{id:'W',name:'Weekly/monthly',criteria:'Periodic standard'}]}]});
+ assert.deepEqual(forms[0].items.map(i=>i.id),['D']);assert.deepEqual(forms[1].items.map(i=>i.id),['W']);assert.deepEqual(forms[2].items.map(i=>i.id),['W']);
+});
