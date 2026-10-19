@@ -78,7 +78,7 @@ begin
   if v_plan->>'plannedDate' !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then raise exception using errcode='22023',message='계획일 형식을 확인하세요.';end if;
   begin v_day:=(v_plan->>'plannedDate')::date;exception when datetime_field_overflow or invalid_datetime_format then raise exception using errcode='22023',message='실제 달력 날짜를 선택하세요.';end;
   if to_char(v_day,'YYYY-MM-DD')<>v_plan->>'plannedDate' then raise exception using errcode='22023',message='계획일을 확인하세요.';end if;
-  if extract(isodow from v_day) in (6,7) then raise exception using errcode='22023',message='주말 계획 작업은 금지됩니다. 평일로 조정하세요.';end if;
+  if extract(isodow from v_day)=7 then raise exception using errcode='22023',message='일요일 계획 작업은 금지됩니다. 월~토 근무일로 조정하세요.';end if;
  end if;
  if v_plan->>'window'='morning' and (v_plan->>'estimatedMinutes')::numeric>90 then raise exception using errcode='22023',message='08:00~09:30은 준비·복구시험·인계를 포함하여 90분 이내여야 합니다.';end if;
  v_changed:=v_old is null or (v_plan-array['actualMinutes','actualCost','safetyChecked','functionChecked','qualityChecked','productionHandedOver','approval','approvalNote']) is distinct from (v_old-array['actualMinutes','actualCost','safetyChecked','functionChecked','qualityChecked','productionHandedOver','approval','approvalNote']) or (p_record->'equipmentId',p_record->'title',p_record->'priority') is distinct from (v_existing->'equipmentId',v_existing->'title',v_existing->'priority') or (coalesce((v_plan->>'actualCost')::numeric,-1)>greatest(coalesce((v_old->>'estimatedCost')::numeric,-1),coalesce((v_old->>'actualCost')::numeric,-1)) and (v_plan->>'actualCost')::numeric>=(v_policy->>'highCostThreshold')::numeric);
@@ -92,7 +92,7 @@ begin
  v_special:=coalesce((v_plan->>'estimatedMinutes')::numeric>90,false) or (v_policy->>'highCostThreshold' is not null and greatest(coalesce((v_plan->>'estimatedCost')::numeric,-1),coalesce((v_plan->>'actualCost')::numeric,-1))>=(v_policy->>'highCostThreshold')::numeric);
  v_status:=p_record->>'status';
  if v_status in ('배정','진행','완료') then
-  if v_day is null or v_plan->>'window'='unplanned' or v_plan->>'estimatedMinutes' is null or (v_plan->>'estimatedMinutes')::numeric<=0 or v_plan->>'estimatedCost' is null then raise exception using errcode='22023',message='배정·실행 전에 평일 계획일·시간대·예상 소요시간·예상비용을 입력하세요.';end if;
+  if v_day is null or v_plan->>'window'='unplanned' or v_plan->>'estimatedMinutes' is null or (v_plan->>'estimatedMinutes')::numeric<=0 or v_plan->>'estimatedCost' is null then raise exception using errcode='22023',message='배정·실행 전에 근무일 계획일·시간대·예상 소요시간·예상비용을 입력하세요.';end if;
   if (v_special and v_plan->>'approval'<>'승인') or v_plan->>'approval'='반려' then raise exception using errcode='42501',message='장기·고액 작업은 관리자 승인 후 배정·실행하세요.';end if;
  end if;
  if v_status in ('진행','완료') and not (v_plan->>'safetyChecked')::boolean then raise exception using errcode='22023',message='작업 전 안전 확인을 완료하세요.';end if;
@@ -115,3 +115,4 @@ revoke all on function public.hdc_v2_save_planned_record(jsonb,jsonb),public.hdc
 grant execute on function public.hdc_v2_save_planned_record(jsonb,jsonb),public.hdc_v2_save_record(jsonb),public.hdc_v2_save_maintenance_policy(jsonb) to authenticated;
 notify pgrst,'reload schema';
 commit;
+
