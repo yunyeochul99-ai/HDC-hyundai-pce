@@ -60,9 +60,11 @@ begin
  select payload into v_policy from public.hdc_v2_maintenance_policy where key='factory';
  v_plan:=coalesce(p_planning,v_old,'{}'::jsonb);
  if jsonb_typeof(v_plan) is distinct from 'object' or octet_length(v_plan::text)>12000 then raise exception using errcode='22023',message='작업 계획 형식을 확인하세요.';end if;
- if exists(select 1 from jsonb_object_keys(v_plan) k where k not in ('category','plannedDate','window','estimatedMinutes','estimatedCost','actualMinutes','actualCost','qualityImpact','productionImpact','idleEquipment','safetyChecked','functionChecked','qualityChecked','productionHandedOver','approval','approvalNote')) then raise exception using errcode='22023',message='허용되지 않은 계획 필드입니다.';end if;
- v_plan:=jsonb_build_object('category','고장수리','plannedDate','','window','unplanned','estimatedMinutes',null,'estimatedCost',null,'actualMinutes',null,'actualCost',null,'qualityImpact',false,'productionImpact',false,'idleEquipment',false,'safetyChecked',false,'functionChecked',false,'qualityChecked',false,'productionHandedOver',false,'approval','미검토','approvalNote','')||v_plan;
- if jsonb_typeof(v_plan->'category') is distinct from 'string' or v_plan->>'category' not in ('예방보전','상태기반','고장수리','개선보전','유휴설비관리') or jsonb_typeof(v_plan->'window') is distinct from 'string' or v_plan->>'window' not in ('morning','weekday','unplanned') or jsonb_typeof(v_plan->'approval') is distinct from 'string' or v_plan->>'approval' not in ('미검토','검토요청','승인','반려') then raise exception using errcode='22023',message='작업 구분·시간대·승인 상태를 확인하세요.';end if;
+ if exists(select 1 from jsonb_object_keys(v_plan) k where k not in ('category','plannedDate','window','estimatedMinutes','estimatedCost','actualMinutes','actualCost','qualityImpact','productionImpact','idleEquipment','safetyChecked','functionChecked','qualityChecked','productionHandedOver','approval','approvalNote','emergencyReason')) then raise exception using errcode='22023',message='허용되지 않은 계획 필드입니다.';end if;
+ v_plan:=jsonb_build_object('category','고장수리','plannedDate','','window','unplanned','estimatedMinutes',null,'estimatedCost',null,'actualMinutes',null,'actualCost',null,'qualityImpact',false,'productionImpact',false,'idleEquipment',false,'safetyChecked',false,'functionChecked',false,'qualityChecked',false,'productionHandedOver',false,'approval','미검토','approvalNote','','emergencyReason','')||v_plan;
+ if jsonb_typeof(v_plan->'category') is distinct from 'string' or v_plan->>'category' not in ('예방보전','상태기반','고장수리','개선보전','유휴설비관리','긴급사후보전') or jsonb_typeof(v_plan->'window') is distinct from 'string' or v_plan->>'window' not in ('morning','weekday','unplanned','sundayEmergency') or jsonb_typeof(v_plan->'approval') is distinct from 'string' or v_plan->>'approval' not in ('미검토','검토요청','승인','반려') then raise exception using errcode='22023',message='작업 구분·시간대·승인 상태를 확인하세요.';end if;
+ if jsonb_typeof(v_plan->'emergencyReason') is distinct from 'string' or char_length(v_plan->>'emergencyReason')>2000 then raise exception using errcode='22023',message='일요일 작업 사유는 2000자 이하로 입력하세요.';end if;
+ if v_old is not null then v_old:='{"emergencyReason":""}'::jsonb||v_old;end if;
  if jsonb_typeof(v_plan->'plannedDate') is distinct from 'string' or jsonb_typeof(v_plan->'approvalNote') is distinct from 'string' or char_length(v_plan->>'approvalNote')>2000 then raise exception using errcode='22023',message='계획일 또는 검토 메모를 확인하세요.';end if;
  foreach v_key in array array['qualityImpact','productionImpact','idleEquipment','safetyChecked','functionChecked','qualityChecked','productionHandedOver'] loop
   if jsonb_typeof(v_plan->v_key) is distinct from 'boolean' then raise exception using errcode='22023',message='작업 확인 항목은 체크값이어야 합니다.';end if;
@@ -78,7 +80,11 @@ begin
   if v_plan->>'plannedDate' !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then raise exception using errcode='22023',message='계획일 형식을 확인하세요.';end if;
   begin v_day:=(v_plan->>'plannedDate')::date;exception when datetime_field_overflow or invalid_datetime_format then raise exception using errcode='22023',message='실제 달력 날짜를 선택하세요.';end;
   if to_char(v_day,'YYYY-MM-DD')<>v_plan->>'plannedDate' then raise exception using errcode='22023',message='계획일을 확인하세요.';end if;
-  if extract(isodow from v_day)=7 then raise exception using errcode='22023',message='일요일 계획 작업은 금지됩니다. 월~토 근무일로 조정하세요.';end if;
+  if extract(isodow from v_day)=7 and not (v_plan->>'category'='긴급사후보전' and v_plan->>'window'='sundayEmergency') then raise exception using errcode='22023',message='일요일은 긴급사후보전과 일요일 특별 작업 시간대를 선택해야 합니다.';end if;
+ end if;
+ if v_plan->>'window'='sundayEmergency' then
+  if v_day is not null and extract(isodow from v_day)<>7 then raise exception using errcode='22023',message='일요일 특별 작업은 일요일 날짜를 선택하세요.';end if;
+  if v_plan->>'category'<>'긴급사후보전' or (v_plan->>'emergencyReason') !~ '[^[:space:]]' then raise exception using errcode='22023',message='긴급사후보전 구분과 불가피한 일요일 작업 사유를 입력하세요.';end if;
  end if;
  if v_plan->>'window'='morning' and (v_plan->>'estimatedMinutes')::numeric>90 then raise exception using errcode='22023',message='08:00~09:30은 준비·복구시험·인계를 포함하여 90분 이내여야 합니다.';end if;
  v_changed:=v_old is null or (v_plan-array['actualMinutes','actualCost','safetyChecked','functionChecked','qualityChecked','productionHandedOver','approval','approvalNote']) is distinct from (v_old-array['actualMinutes','actualCost','safetyChecked','functionChecked','qualityChecked','productionHandedOver','approval','approvalNote']) or (p_record->'equipmentId',p_record->'title',p_record->'priority') is distinct from (v_existing->'equipmentId',v_existing->'title',v_existing->'priority') or (coalesce((v_plan->>'actualCost')::numeric,-1)>greatest(coalesce((v_old->>'estimatedCost')::numeric,-1),coalesce((v_old->>'actualCost')::numeric,-1)) and (v_plan->>'actualCost')::numeric>=(v_policy->>'highCostThreshold')::numeric);
@@ -89,11 +95,11 @@ begin
   elsif v_plan->'approvalNote' is distinct from v_old->'approvalNote' then raise exception using errcode='42501',message='관리자의 승인 의견은 변경할 수 없습니다.';end if;
  end if;
  if v_changed and not v_is_admin and v_old_approval='승인' then v_plan:=v_plan||'{"approval":"미검토"}'::jsonb;end if;
- v_special:=coalesce((v_plan->>'estimatedMinutes')::numeric>90,false) or (v_policy->>'highCostThreshold' is not null and greatest(coalesce((v_plan->>'estimatedCost')::numeric,-1),coalesce((v_plan->>'actualCost')::numeric,-1))>=(v_policy->>'highCostThreshold')::numeric);
+ v_special:=(v_plan->>'window'='sundayEmergency') or coalesce((v_plan->>'estimatedMinutes')::numeric>90,false) or (v_policy->>'highCostThreshold' is not null and greatest(coalesce((v_plan->>'estimatedCost')::numeric,-1),coalesce((v_plan->>'actualCost')::numeric,-1))>=(v_policy->>'highCostThreshold')::numeric);
  v_status:=p_record->>'status';
  if v_status in ('배정','진행','완료') then
   if v_day is null or v_plan->>'window'='unplanned' or v_plan->>'estimatedMinutes' is null or (v_plan->>'estimatedMinutes')::numeric<=0 or v_plan->>'estimatedCost' is null then raise exception using errcode='22023',message='배정·실행 전에 근무일 계획일·시간대·예상 소요시간·예상비용을 입력하세요.';end if;
-  if (v_special and v_plan->>'approval'<>'승인') or v_plan->>'approval'='반려' then raise exception using errcode='42501',message='장기·고액 작업은 관리자 승인 후 배정·실행하세요.';end if;
+  if (v_special and v_plan->>'approval'<>'승인') or v_plan->>'approval'='반려' then raise exception using errcode='42501',message='장기·고액·일요일 긴급 작업은 관리자 승인 후 배정·실행하세요.';end if;
  end if;
  if v_status in ('진행','완료') and not (v_plan->>'safetyChecked')::boolean then raise exception using errcode='22023',message='작업 전 안전 확인을 완료하세요.';end if;
  if v_status='완료' and (not (v_plan->>'functionChecked')::boolean or not (v_plan->>'qualityChecked')::boolean or not (v_plan->>'productionHandedOver')::boolean or v_plan->>'actualMinutes' is null or v_plan->>'actualCost' is null) then raise exception using errcode='22023',message='완료 전에 기능·품질·생산 인계 확인과 실제 시간·비용을 입력하세요.';end if;
@@ -115,4 +121,5 @@ revoke all on function public.hdc_v2_save_planned_record(jsonb,jsonb),public.hdc
 grant execute on function public.hdc_v2_save_planned_record(jsonb,jsonb),public.hdc_v2_save_record(jsonb),public.hdc_v2_save_maintenance_policy(jsonb) to authenticated;
 notify pgrst,'reload schema';
 commit;
+
 

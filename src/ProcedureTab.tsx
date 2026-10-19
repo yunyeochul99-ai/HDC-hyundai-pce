@@ -50,7 +50,7 @@ export default function ProcedureTab({policy,isAdmin,onPolicySave,onCreateWork,o
  return <div className="procedure-tab">
   <section className="card procedure-cover" aria-labelledby="procedure-title">
    <div className="procedure-cover-main"><span className="procedure-kicker"><BookOpen size={15}/> HDC PCE · 설비보전 운영 기준</span><h2 id="procedure-title">목적을 먼저 정하고,<br/>그 목적에 맞게 정비합니다.</h2><p>생산과 품질에 필요한 설비를 유지하면서, 정지 시간과 유지보수 비용을 줄이는 보전 부서의 운영 초안입니다.</p><div className="procedure-document-meta"><span className="tag green">운영 초안 v{policy.policyVersion}</span><span>적용 대상 · 생산 설비와 유휴 설비</span><span>추가 세부 기준 · 관리자 검토 필요</span></div></div>
-   <aside className="procedure-window"><div className="procedure-window-icon"><Clock3 size={22}/></div><span>근무일 비가동 시간 우선 활용</span><strong>08:00 <i>—</i> 09:30</strong><p>준비부터 생산 인계까지<br/><b>90분 안에 완료 가능한 작업</b>을 우선 배정합니다.</p><div><CalendarDays size={14}/> 월~토는 정상근무일이며, 일요일 계획 작업은 배정하지 않습니다</div></aside>
+   <aside className="procedure-window"><div className="procedure-window-icon"><Clock3 size={22}/></div><span>근무일 비가동 시간 우선 활용</span><strong>08:00 <i>—</i> 09:30</strong><p>준비부터 생산 인계까지<br/><b>90분 안에 완료 가능한 작업</b>을 우선 배정합니다.</p><div><CalendarDays size={14}/> 월~토는 정상근무일이며, 일요일 일반 작업은 제외하며 긴급사후보전은 사유·관리자 승인 후 별도 배정합니다</div></aside>
   </section>
 
   <div className="procedure-section-head"><div><span className="procedure-step-label">01 · 보전 목적</span><h2>보전 부서가 지켜야 할 여섯 가지 목적</h2></div><span className="procedure-caption">안전·품질을 전제로 시간과 비용을 관리</span></div>
@@ -59,7 +59,7 @@ export default function ProcedureTab({policy,isAdmin,onPolicySave,onCreateWork,o
   <div className="procedure-section-head"><div><span className="procedure-step-label">02 · 부서 정책</span><h2>작업 요청을 계획으로 바꾸는 판단 기준</h2></div></div>
   <section className="card procedure-policy-card" aria-label="보전 부서 정책">
    <div className="procedure-rule"><span className="procedure-rule-icon green"><Clock3 size={19}/></span><div><h3>90분 안에 끝낼 수 있는 작업을 우선</h3><p>준비·안전 격리·수리·복구·기능 및 품질 검증·생산 인계까지 필요한 전체 시간을 기준으로 판단합니다. 수리 시간만으로 90분 작업 여부를 정하지 않습니다.</p></div><span className="tag green">근무일 08:00–09:30</span></div>
-   <div className="procedure-rule"><span className="procedure-rule-icon amber"><CalendarDays size={19}/></span><div><h3>장시간 작업은 별도의 근무일 정지 계획</h3><p>90분 초과 작업은 작업 분할 가능성과 별도 근무일 생산 정지 계획을 검토하고 관리자의 사전 승인을 받습니다. 월~토는 정상근무일이며, 일요일 계획 작업은 배정하지 않습니다.</p></div><span className="tag amber">특별관리</span></div>
+   <div className="procedure-rule"><span className="procedure-rule-icon amber"><CalendarDays size={19}/></span><div><h3>장시간 작업은 별도의 근무일 정지 계획</h3><p>90분 초과 작업은 작업 분할 가능성과 별도 근무일 생산 정지 계획을 검토하고 관리자의 사전 승인을 받습니다. 월~토는 정상근무일이며, 일요일 일반 작업은 제외하며 긴급사후보전은 사유·관리자 승인 후 별도 배정합니다.</p></div><span className="tag amber">특별관리</span></div>
    <div className="procedure-rule"><span className="procedure-rule-icon amber"><Coins size={19}/></span><div><h3>고액 작업은 예산과 수리·교체 경제성 검토</h3><p>예상·실제 비용을 관리하고, 고액 작업은 견적·예산·수리 또는 교체 근거를 검토한 뒤 승인합니다. {policy.highCostThreshold===null?'고액 기준이 아직 없어 금액 판단은 관리자 검토가 필요합니다.':`현재 고액 특별관리 기준은 ${money(policy.highCostThreshold)} 이상입니다.`}</p></div><span className={`tag ${policy.highCostThreshold===null?'amber':'blue'}`}>{policy.highCostThreshold===null?'기준 미설정':`${money(policy.highCostThreshold)} 이상`}</span></div>
    <div className="procedure-rule"><span className="procedure-rule-icon blue"><ShieldCheck size={19}/></span><div><h3>안전·품질·생산 영향은 작업 전 확인</h3><p>고장이나 품질 영향이 예상되면 우선순위와 검증 계획을 먼저 정합니다. 현장 안전 절차를 따르고, 복구 시험과 필요한 품질 확인 후 생산에 인계합니다.</p></div><span className="tag blue">영향 사전 관리</span></div>
    <div className="procedure-rule"><span className="procedure-rule-icon"><LockKeyhole size={19}/></span><div><h3>유휴 설비는 필요한 보존 정비만</h3><p>가동·유휴·폐기 검토 상태를 구분해 불필요한 정비 지출을 줄입니다. 유휴 설비는 보존에 필요한 정비를 실시하고, 승인 없이 재가동하지 않습니다.</p></div><span className="tag">상태별 관리</span></div>
@@ -80,4 +80,5 @@ export default function ProcedureTab({policy,isAdmin,onPolicySave,onCreateWork,o
   <p className="procedure-draft-note"><BookOpen size={14}/>운영 초안 v{policy.policyVersion} · 사용자가 제시한 보전 목적과 기본 원칙을 반영했습니다. 세부 목표·현장별 작업 기준·정책 승인 절차는 관리자 검토 후 확정합니다.</p><p className="procedure-draft-note">참고 자료: <a href="https://www.energy.gov/cmei/femp/articles/operations-and-maintenance-best-practices-guide-achieving-operational-efficiency" target="_blank" rel="noreferrer">미국 에너지부 O&amp;M Best Practices ↗</a></p>
  </div>;
 }
+
 

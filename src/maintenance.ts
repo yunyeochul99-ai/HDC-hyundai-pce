@@ -1,9 +1,9 @@
 import { readableError, supabase } from './backend';
 
 export type WorkPlan = {
-  category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리';
+  category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리' | '긴급사후보전';
   plannedDate: string;
-  window: 'morning' | 'weekday' | 'unplanned';
+  window: 'morning' | 'weekday' | 'unplanned' | 'sundayEmergency';
   /** Total preparation, repair, functional/quality checks and production handover. */
   estimatedMinutes: number | null;
   estimatedCost: number | null;
@@ -18,6 +18,7 @@ export type WorkPlan = {
   productionHandedOver: boolean;
   approval: '미검토' | '검토요청' | '승인' | '반려';
   approvalNote: string;
+  emergencyReason: string;
 };
 
 export type MaintenancePolicy = {
@@ -32,7 +33,7 @@ export const defaultPlan: WorkPlan = {
   estimatedMinutes: null, estimatedCost: null, actualMinutes: null, actualCost: null,
   qualityImpact: false, productionImpact: false, idleEquipment: false,
   safetyChecked: false, functionChecked: false, qualityChecked: false,
-  productionHandedOver: false, approval: '미검토', approvalNote: '',
+  productionHandedOver: false, approval: '미검토', approvalNote: '', emergencyReason: '',
 };
 
 export const defaultPolicy: MaintenancePolicy = {
@@ -41,9 +42,9 @@ export const defaultPolicy: MaintenancePolicy = {
   policyVersion: 0,
 };
 
-const categories = ['예방보전', '상태기반', '고장수리', '개선보전', '유휴설비관리'];
+const categories = ['예방보전', '상태기반', '고장수리', '개선보전', '유휴설비관리', '긴급사후보전'];
 const approvals = ['미검토', '검토요청', '승인', '반려'];
-const windows = ['morning', 'weekday', 'unplanned'];
+const windows = ['morning', 'weekday', 'unplanned', 'sundayEmergency'];
 const numberOrNull = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
 
 /** Normalize missing legacy fields for display. The database independently validates writes. */
@@ -61,13 +62,14 @@ export function normalizePlan(input: unknown): WorkPlan {
     productionHandedOver: p.productionHandedOver === true,
     approval: (approvals.includes(p.approval as string) ? p.approval : defaultPlan.approval) as WorkPlan['approval'],
     approvalNote: typeof p.approvalNote === 'string' ? p.approvalNote : '',
+    emergencyReason: typeof p.emergencyReason === 'string' ? p.emergencyReason : '',
   };
 }
 
 export type PlanAssessment = {
   errors: string[]; warnings: string[]; longWork: boolean; highCost: boolean;
   budgetReview: boolean; special: boolean; requiresApproval: boolean;
-  morningEligible: boolean; weekend: boolean;
+  morningEligible: boolean; weekend: boolean; sundayEmergency: boolean;
 };
 
 function validDate(value: string) {
@@ -86,11 +88,15 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   const longWork = plan.estimatedMinutes !== null && plan.estimatedMinutes > 90;
   const highCost = policy.highCostThreshold !== null && Math.max(plan.estimatedCost ?? -1,plan.actualCost ?? -1) >= policy.highCostThreshold;
   const budgetReview = policy.highCostThreshold === null;
-  const special = longWork || highCost;
+  const sundayEmergency = weekend && plan.category === '긴급사후보전' && plan.window === 'sundayEmergency';
+  const special = longWork || highCost || sundayEmergency;
   const active = ['배정', '진행', '완료'].includes(status);
   const requiresApproval = special;
   if (plan.plannedDate && !hasDate) errors.push('실제 달력 날짜를 입력하세요.');
-  if (weekend) errors.push('일요일에는 신규 보전 작업을 계획할 수 없습니다. 월~토 근무일로 조정하세요.');
+  if (weekend && !sundayEmergency) errors.push('일요일 일반 작업은 제외합니다. 불가피한 작업은 긴급사후보전과 일요일 특별 작업 시간대를 선택하세요.');
+  if (plan.window === 'sundayEmergency' && hasDate && !weekend) errors.push('일요일 특별 작업은 일요일 날짜를 선택하세요. 월~토 작업은 근무일 시간대를 사용하세요.');
+  if (plan.window === 'sundayEmergency' && plan.category !== '긴급사후보전') errors.push('일요일 특별 작업의 보전 구분은 긴급사후보전으로 선택하세요.');
+  if (plan.window === 'sundayEmergency' && !plan.emergencyReason.trim()) errors.push('불가피한 일요일 작업 사유와 긴급 조치 범위를 입력하세요.');
   if (active && !hasDate) errors.push('배정·진행·완료 전에 근무일 작업 예정일을 입력하세요.');
   if (active && plan.window === 'unplanned') errors.push('배정·진행·완료 전에 작업 시간대를 선택하세요.');
   if (active && plan.estimatedMinutes === null) errors.push('준비부터 생산 인계까지 예상 소요시간을 입력하세요.');
@@ -100,8 +106,9 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   if (['진행', '완료'].includes(status) && !plan.safetyChecked) errors.push('작업 전에 안전 확인을 완료하세요.');
   if (status === '완료' && (!plan.functionChecked || !plan.qualityChecked || !plan.productionHandedOver)) errors.push('완료 전 기능·품질 확인과 생산 인계를 모두 확인하세요.');
   if (status === '완료' && (plan.actualMinutes === null || plan.actualCost === null)) errors.push('완료 전에 실제 시간과 실제 비용을 입력하세요. 비용이 없으면 0원을 입력하세요.');
-  if (active && requiresApproval && plan.approval !== '승인') errors.push('장시간·고액 특별관리 작업은 관리자 승인 후 배정·실행하세요.');
+  if (active && requiresApproval && plan.approval !== '승인') errors.push('장시간·고액·일요일 긴급 작업은 관리자 승인 후 배정·실행하세요.');
   if (active && plan.approval === '반려') errors.push('반려된 작업은 계획을 보완하고 다시 검토받으세요.');
+  if (sundayEmergency) warnings.push('일요일 긴급사후보전입니다. 관리자 승인과 현장 안전절차를 확인한 뒤 작업하세요.');
   if (longWork) warnings.push('90분을 넘는 작업입니다. 근무일 정지계획과 작업 분할·외주 필요성을 검토하세요.');
   if (highCost) warnings.push('고액 특별관리 대상입니다. 수리·교체 대안과 예산을 검토하세요.');
   if (budgetReview) warnings.push('고액 기준이 미설정되어 예산 검토가 필요합니다. 관리자가 기준을 확정하세요.');
@@ -109,7 +116,7 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   if (plan.qualityImpact) warnings.push('제품 품질에 영향이 있습니다. 품질 요구사항과 재가동 판정 기준을 확인하세요.');
   if (plan.productionImpact) warnings.push('생산에 영향이 있습니다. 생산부서와 근무일 정지·복구 시점을 협의하세요.');
   if (plan.idleEquipment) warnings.push('유휴설비는 보존·안전 위주로 관리하고 불필요한 정비비를 줄이세요.');
-  return { errors, warnings, longWork, highCost, budgetReview, special, requiresApproval, morningEligible: hasDate && plan.estimatedMinutes !== null && plan.estimatedMinutes > 0 && plan.estimatedMinutes <= 90 && !weekend, weekend };
+  return { errors, warnings, longWork, highCost, budgetReview, special, requiresApproval, morningEligible: hasDate && plan.estimatedMinutes !== null && plan.estimatedMinutes > 0 && plan.estimatedMinutes <= 90 && !weekend, weekend, sundayEmergency };
 }
 
 export async function getPolicy(): Promise<MaintenancePolicy> {
@@ -140,4 +147,5 @@ export async function savePlannedRecord<T extends Record<string, unknown>>(recor
   const { planning: embedded, ...body } = record;
   return supabase.rpc('hdc_v2_save_planned_record', { p_record: body, p_planning: planning ?? embedded ?? null });
 }
+
 
