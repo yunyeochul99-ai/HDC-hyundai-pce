@@ -115,3 +115,15 @@ td b{color:#48616f;font-weight:600}tbody tr[tabindex]{cursor:pointer}.empty>svg{
 }
 
 .account-button{width:100%;padding:20px 0 0;background:transparent;color:inherit;text-align:left}.account-button:hover b{color:#80e2c7}.loading .button-row{justify-content:center;margin-top:20px}.photo-placeholder{display:flex;min-height:90px;align-items:center;justify-content:center;padding:12px;border:1px solid var(--border);border-radius:6px;color:var(--muted-foreground);font-size:11px}.loading p{max-width:580px;padding:0 20px}
+
+/* Green identifies facility-team review areas, independently of result status. */
+.facility-review,.inspection-hub>.card.facility-review{background:#edf8f1;border-color:#a8d4b8}
+.facility-review-label{color:#235d39;font-size:12px;font-weight:700;line-height:1.7;margin:8px 0 12px}
+.work-planning-fields{background:#fff}
+.work-planning-fields .form-grid.facility-review{padding:14px;border:1px solid #a8d4b8;border-radius:8px}
+.work-planning-fields .planning-checks{padding:14px;border:1px solid #a8d4b8;border-radius:8px;background:#edf8f1}
+.work-planning-fields .planning-checks label{color:#244e34}
+.modal form .check-item{background:#edf8f1;border-color:#a8d4b8}
+.modal form .form-section h3::after{content:'시설팀 확인';display:inline-block;margin-left:10px;padding:3px 7px;border-radius:4px;background:#edf8f1;color:#235d39;font-size:10px;font-weight:600}
+.facility-review input,.facility-review select,.facility-review textarea{background:#fff}
+
