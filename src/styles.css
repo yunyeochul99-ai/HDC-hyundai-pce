@@ -156,3 +156,11 @@ td b{color:#48616f;font-weight:600}tbody tr[tabindex]{cursor:pointer}.empty>svg{
 .preventive-manager .role-approval-button{background:#edf8f1;border-color:#a8d4b8;color:#235d39}
 @media(max-width:600px){.facility-operations-zone{padding:12px}.planning-zone-guide{font-size:11px}}
 
+
+.inspection-hub .hub-tabs button.facility-tab{background:#eaf3ff;border-color:#9ebfe7;color:#24486c}
+.inspection-hub .hub-tabs button.facility-tab.selected,.inspection-hub .facility-review .hub-tabs button.selected{background:#245a91;border-color:#245a91;color:#fff}
+.inspection-hub .facility-review .hub-tabs button{border-color:#9ebfe7;color:#24486c}
+.inspection-hub .inspection-templates>.card.facility-review{background:#eaf3ff;border-color:#9ebfe7;color:#24486c}
+.inspection-hub .inspection-templates>.card.facility-review>.primary{background:#245a91;border-color:#245a91;color:#fff}
+.inspection-hub .inspection-templates>.card.facility-review>.primary:hover{background:#1b4776}
+
