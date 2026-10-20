@@ -11,3 +11,6 @@ export const equipmentAction=(equipment:string,action:string,body:unknown,versio
 
 export const reassignInspectionRequest=(request:string,expected:string,assignee:string,reason:string)=>rpc('hdc_v2_inspection_reassign',{p_request:request,p_expected:expected,p_assignee:assignee,p_reason:reason});
 
+
+export const editInspectionRequest=(request:string,expected:unknown,patch:unknown,reason:string)=>rpc('hdc_v2_inspection_request_edit',{p_request:request,p_expected:expected,p_patch:patch,p_reason:reason});
+
