@@ -1,5 +1,5 @@
 import {supabase,readableError} from './backend';
-export type InspectionRequest={id:string;equipment_id:string;assignee_id:string;symptom:string;inspection_id:string|null;created_at:string;completed_at:string|null;date:string;dueDate:string;dates_managed:boolean;version:number;archived:boolean;archive_reason:string|null;archive_at:string|null};
+export type InspectionRequest={id:string;equipment_id:string;assignee_id:string;reporter_id:string;symptom:string;inspection_id:string|null;created_at:string;completed_at:string|null;date:string;dueDate:string;dates_managed:boolean;version:number;archived:boolean;archive_reason:string|null;archive_at:string|null};
 export type EquipmentLifecycle={equipment_id:string;status:'active'|'retired';reason:string;effective_on:string;version:number};
 export type InspectionHubState={members:{id:string;name:string}[];requests:InspectionRequest[];lifecycle:EquipmentLifecycle[]};
 export const emptyInspectionHub:InspectionHubState={members:[],requests:[],lifecycle:[]};
@@ -13,6 +13,3 @@ export const reassignInspectionRequest=(request:string,expected:string,assignee:
 
 
 export const editInspectionRequest=(request:string,expected:unknown,patch:unknown,reason:string)=>rpc('hdc_v2_inspection_request_edit',{p_request:request,p_expected:expected,p_patch:patch,p_reason:reason});
-
-
-
