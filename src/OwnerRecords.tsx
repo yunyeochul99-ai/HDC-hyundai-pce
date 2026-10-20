@@ -1,0 +1,8 @@
+import {useState} from 'react';
+type Row={id:string;type:string;title:string;equipmentName:string;assignee:string;date:string};
+export default function OwnerRecords({records,requestIds,archivedIds,onEdit}:{records:Row[];requestIds:Set<string>;archivedIds:Set<string>;onEdit:(record:Row)=>void}){
+ const [open,setOpen]=useState(false),[search,setSearch]=useState(''),[page,setPage]=useState(1);
+ const matching=records.filter(r=>`${r.title} ${r.equipmentName} ${r.assignee} ${r.date}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
+ return <section className="card role-zone-approver owner-records"><p className="role-zone-label">윤여철 공장장 전용 · 전체 업무 기록 수정</p><p>작성자·완료 여부와 관계없이 접수·점검·작업 기록을 수정합니다. 삭제 보관된 기록은 보관 상태를 유지하며 수정 전·후 이력을 남깁니다.</p><button className="secondary" type="button" onClick={()=>setOpen(!open)}>{open?'전체 기록 닫기':'전체 기록 수정'}</button>{open&&<><label>전체 기록 검색<input value={search} placeholder="설비·제목·담당자·날짜" onChange={e=>{setSearch(e.target.value);setPage(1);}}/></label><p>{matching.length}건</p>{matching.slice((page-1)*20,page*20).map(r=><div className="hub-request" key={r.id}><div><b>{r.title}</b><p>{requestIds.has(r.id)?'이상 접수 기록':r.type==='inspection'?'점검 기록':'작업 기록'} · {r.equipmentName} · {r.date} · {r.assignee||'미지정'}{archivedIds.has(r.id)?' · 삭제 보관 중':''}</p></div><button type="button" className="secondary" onClick={()=>onEdit(r)}>공장장 기록 수정</button></div>)}{matching.length>20&&<div className="form-approval-buttons"><button type="button" className="secondary" disabled={page<=1} onClick={()=>setPage(page-1)}>이전</button><span>{page}/{Math.max(1,Math.ceil(matching.length/20))}</span><button type="button" className="secondary" disabled={page*20>=matching.length} onClick={()=>setPage(page+1)}>다음</button></div>}</>}</section>;
+}
+
