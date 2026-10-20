@@ -8,3 +8,6 @@ export const loadInspectionHub=async():Promise<InspectionHubState>=>await rpc('h
 export const createInspectionRequest=(id:string,equipment:string,assignee:string,symptom:string)=>rpc('hdc_v2_inspection_request',{p_id:id,p_equipment:equipment,p_assignee:assignee,p_symptom:symptom});
 export const finishInspectionRequest=(request:string,record:unknown)=>rpc('hdc_v2_inspection_finish',{p_request:request,p_record:record});
 export const equipmentAction=(equipment:string,action:string,body:unknown,version:number)=>rpc('hdc_v2_equipment_action',{p_equipment:equipment,p_action:action,p_body:body,p_version:version});
+
+export const reassignInspectionRequest=(request:string,expected:string,assignee:string,reason:string)=>rpc('hdc_v2_inspection_reassign',{p_request:request,p_expected:expected,p_assignee:assignee,p_reason:reason});
+

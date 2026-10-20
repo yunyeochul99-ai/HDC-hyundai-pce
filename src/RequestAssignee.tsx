@@ -1,0 +1,9 @@
+import {useState} from 'react';
+import {reassignInspectionRequest,type InspectionRequest} from './inspection-hub';
+
+export default function RequestAssignee({request,members,isOwner,onChanged,disabled=false}:{request:InspectionRequest;members:{id:string;name:string}[];isOwner:boolean;onChanged:()=>Promise<void>;disabled?:boolean}){
+ const [selected,setSelected]=useState(request.assignee_id),[reason,setReason]=useState(''),[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
+ async function save(){if(busy)return;if(!reason.trim()){setError('변경 사유를 입력하세요.');return;}setBusy(true);setError('');setMessage('');try{await reassignInspectionRequest(request.id,request.assignee_id,selected,reason);await onChanged();setOpen(false);setReason('');setMessage('서버 저장 완료 · 담당자가 변경되었습니다.');}catch(e){setError(e instanceof Error?e.message:'담당자 변경 실패');}finally{setBusy(false);}}
+ return <div className={isOwner?'role-zone-approver':'footnote'}><p>담당자 변경은 윤여철 공장장만 가능합니다.</p>{isOwner&&!request.completed_at&&<><button type="button" className="secondary" disabled={disabled||busy} onClick={()=>{setSelected(request.assignee_id);setOpen(!open);setError('');}}>담당자 변경</button>{open&&<div><label>변경할 담당자<select value={selected} disabled={busy} onChange={e=>setSelected(e.target.value)}>{members.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></label><label>담당자 변경 사유<input maxLength={1000} value={reason} disabled={busy} onChange={e=>setReason(e.target.value)}/></label><p className="footnote">이 변경은 아래 점검 결과 저장과 별도로 서버에 즉시 반영됩니다.</p><button type="button" className="primary" disabled={busy||disabled||selected===request.assignee_id||!reason.trim()} onClick={save}>{busy?'담당자 변경 중…':'담당자 변경 저장'}</button></div>}</>}{error&&<p role="alert" className="error-msg">{error}</p>}{message&&<p role="status">{message}</p>}</div>;
+}
+
