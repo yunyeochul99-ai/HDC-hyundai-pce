@@ -5,3 +5,6 @@
 
 .request-editor{padding:14px;margin-top:12px;border:1px solid #b8d8c5;border-radius:7px;min-width:0}.request-editor label{display:block}.request-editor textarea{width:100%}.hub-request>div{flex:1}
 
+
+.record-origin{padding:16px;border:1px solid #b9d6e8;border-radius:8px;background:#eff7fc;margin-bottom:18px;font-size:13px}.record-origin p{line-height:1.7;overflow-wrap:anywhere}.record-origin small{display:block;margin:6px 0;color:#596c78}.record-origin button{margin-top:8px}.record-origin details{margin-top:10px}
+
