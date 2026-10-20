@@ -3,6 +3,7 @@ import { readableError, supabase } from './backend';
 export type WorkPlan = {
   category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리' | '긴급사후보전';
   plannedDate: string;
+  plannedStartAt: string;plannedEndAt: string;actualStartAt: string;actualEndAt: string;
   window: 'morning' | 'weekday' | 'unplanned' | 'sundayEmergency';
   /** Total preparation, repair, functional/quality checks and production handover. */
   estimatedMinutes: number | null;
@@ -29,7 +30,7 @@ export type MaintenancePolicy = {
 };
 
 export const defaultPlan: WorkPlan = {
-  category: '고장수리', plannedDate: '', window: 'unplanned',
+  category: '고장수리', plannedDate: '',plannedStartAt:'',plannedEndAt:'',actualStartAt:'',actualEndAt:'', window: 'unplanned',
   estimatedMinutes: null, estimatedCost: null, actualMinutes: null, actualCost: null,
   qualityImpact: false, productionImpact: false, idleEquipment: false,
   safetyChecked: false, functionChecked: false, qualityChecked: false,
@@ -53,6 +54,7 @@ export function normalizePlan(input: unknown): WorkPlan {
   return {
     category: (categories.includes(p.category as string) ? p.category : defaultPlan.category) as WorkPlan['category'],
     plannedDate: typeof p.plannedDate === 'string' ? p.plannedDate : '',
+    plannedStartAt:typeof p.plannedStartAt==='string'?p.plannedStartAt:'',plannedEndAt:typeof p.plannedEndAt==='string'?p.plannedEndAt:'',actualStartAt:typeof p.actualStartAt==='string'?p.actualStartAt:'',actualEndAt:typeof p.actualEndAt==='string'?p.actualEndAt:'',
     window: (windows.includes(p.window as string) ? p.window : defaultPlan.window) as WorkPlan['window'],
     estimatedMinutes: numberOrNull(p.estimatedMinutes), estimatedCost: numberOrNull(p.estimatedCost),
     actualMinutes: numberOrNull(p.actualMinutes), actualCost: numberOrNull(p.actualCost),
@@ -65,6 +67,9 @@ export function normalizePlan(input: unknown): WorkPlan {
     emergencyReason: typeof p.emergencyReason === 'string' ? p.emergencyReason : '',
   };
 }
+
+export function validWorkTimestamp(value:string){if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value))return false;const d=new Date(value+'+09:00');return Number.isFinite(d.getTime())&&new Date(d.getTime()+9*3600000).toISOString().slice(0,16)===value;}
+export function workIntervalMinutes(start:string,end:string){return validWorkTimestamp(start)&&validWorkTimestamp(end)?(Date.parse(end+'+09:00')-Date.parse(start+'+09:00'))/60000:null;}
 
 export type PlanAssessment = {
   errors: string[]; warnings: string[]; longWork: boolean; highCost: boolean;
@@ -92,6 +97,16 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   const special = longWork || highCost || sundayEmergency;
   const active = ['배정', '진행', '완료'].includes(status);
   const requiresApproval = special;
+  for(const [label,value] of [['계획 시작',plan.plannedStartAt],['계획 종료',plan.plannedEndAt],['실제 시작',plan.actualStartAt],['실제 종료',plan.actualEndAt]])if(value&&!validWorkTimestamp(value))errors.push(`${label} 날짜와 시각을 확인하세요.`);
+  if(plan.window==='weekday'){
+    if(!hasDate||!plan.plannedStartAt||!plan.plannedEndAt)errors.push('별도 근무일 정지는 정비 날짜·계획 시작·종료 시각을 모두 입력하세요.');
+    if(plan.plannedStartAt&&plan.plannedStartAt.slice(0,10)!==plan.plannedDate)errors.push('작업 예정일과 계획 시작 날짜를 같게 입력하세요.');
+    if(workIntervalMinutes(plan.plannedStartAt,plan.plannedEndAt)!==null&&workIntervalMinutes(plan.plannedStartAt,plan.plannedEndAt)!<=0)errors.push('계획 종료는 시작 이후여야 합니다.');
+    if(['진행','완료'].includes(status)&&!plan.actualStartAt)errors.push('작업 진행 전에 실제 정비 시작 시각을 입력하세요.');
+    if(status==='완료'&&!plan.actualEndAt)errors.push('완료 전에 실제 정비 종료 시각을 입력하세요.');
+  }
+  if(plan.actualEndAt&&!plan.actualStartAt)errors.push('실제 종료를 입력하려면 실제 시작 시각을 입력하세요.');
+  if(workIntervalMinutes(plan.actualStartAt,plan.actualEndAt)!==null&&workIntervalMinutes(plan.actualStartAt,plan.actualEndAt)!<=0)errors.push('실제 종료는 시작 이후여야 합니다.');
   if (plan.plannedDate && !hasDate) errors.push('실제 달력 날짜를 입력하세요.');
   if (weekend && !sundayEmergency) errors.push('일요일 일반 작업은 제외합니다. 불가피한 작업은 긴급사후보전과 일요일 특별 작업 시간대를 선택하세요.');
   if (plan.window === 'sundayEmergency' && hasDate && !weekend) errors.push('일요일 특별 작업은 일요일 날짜를 선택하세요. 월~토 작업은 근무일 시간대를 사용하세요.');
@@ -147,5 +162,6 @@ export async function savePlannedRecord<T extends Record<string, unknown>>(recor
   const { planning: embedded, ...body } = record;
   return supabase.rpc('hdc_v2_save_planned_record', { p_record: body, p_planning: planning ?? embedded ?? null });
 }
+
 
 
