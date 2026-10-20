@@ -99,13 +99,13 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   const requiresApproval = special;
   for(const [label,value] of [['계획 시작',plan.plannedStartAt],['계획 종료',plan.plannedEndAt],['실제 시작',plan.actualStartAt],['실제 종료',plan.actualEndAt]])if(value&&!validWorkTimestamp(value))errors.push(`${label} 날짜와 시각을 확인하세요.`);
   if(plan.window==='weekday'){
-    if(!hasDate||!plan.plannedStartAt||!plan.plannedEndAt)errors.push('별도 근무일 정지는 정비 날짜·계획 시작·종료 시각을 모두 입력하세요.');
-    if(plan.plannedStartAt&&plan.plannedStartAt.slice(0,10)!==plan.plannedDate)errors.push('작업 예정일과 계획 시작 날짜를 같게 입력하세요.');
+    if(!plan.plannedStartAt||!plan.plannedEndAt||!plan.actualStartAt||!plan.actualEndAt)warnings.push('정비 시작·종료 시각 중 미입력 항목이 있습니다. 저장 후 추후 입력할 수 있습니다.');
+    if(plan.plannedStartAt&&plan.plannedDate&&plan.plannedStartAt.slice(0,10)!==plan.plannedDate)errors.push('작업 예정일과 계획 시작 날짜를 같게 입력하세요.');
     if(workIntervalMinutes(plan.plannedStartAt,plan.plannedEndAt)!==null&&workIntervalMinutes(plan.plannedStartAt,plan.plannedEndAt)!<=0)errors.push('계획 종료는 시작 이후여야 합니다.');
-    if(['진행','완료'].includes(status)&&!plan.actualStartAt)errors.push('작업 진행 전에 실제 정비 시작 시각을 입력하세요.');
-    if(status==='완료'&&!plan.actualEndAt)errors.push('완료 전에 실제 정비 종료 시각을 입력하세요.');
+
+
   }
-  if(plan.actualEndAt&&!plan.actualStartAt)errors.push('실제 종료를 입력하려면 실제 시작 시각을 입력하세요.');
+
   if(workIntervalMinutes(plan.actualStartAt,plan.actualEndAt)!==null&&workIntervalMinutes(plan.actualStartAt,plan.actualEndAt)!<=0)errors.push('실제 종료는 시작 이후여야 합니다.');
   if (plan.plannedDate && !hasDate) errors.push('실제 달력 날짜를 입력하세요.');
   if (weekend && !sundayEmergency) errors.push('일요일 일반 작업은 제외합니다. 불가피한 작업은 긴급사후보전과 일요일 특별 작업 시간대를 선택하세요.');
@@ -162,6 +162,7 @@ export async function savePlannedRecord<T extends Record<string, unknown>>(recor
   const { planning: embedded, ...body } = record;
   return supabase.rpc('hdc_v2_save_planned_record', { p_record: body, p_planning: planning ?? embedded ?? null });
 }
+
 
 
 
