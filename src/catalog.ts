@@ -1,5 +1,5 @@
 import {readableError,supabase} from './backend';
-export type CatalogEquipment={id:string;name:string;grade?:string;model?:string;category?:string;cycle?:string;isCustom?:boolean;source?:{id?:string;sheet?:string}};
+export type CatalogEquipment={id:string;name:string;grade?:string;model?:string;category?:string;cycle?:string;isCustom?:boolean;isStatutoryTarget?:boolean;source?:{id?:string;sheet?:string}};
 export type CatalogChecklist={id:string;equipment:string;equipmentName?:string;title:string;cycle:string;isCustom?:boolean;items:{id:string;name:string;criteria:string}[]};
 export type Catalog={equipment:CatalogEquipment[];checklists:CatalogChecklist[]};
 export type CatalogCreated={equipment:CatalogEquipment;checklist:CatalogChecklist};
@@ -10,7 +10,7 @@ export function mergeCatalogLists(before:Catalog,next:Catalog):Catalog{
 }
 export function mergeCatalog<T extends Catalog>(base:T,extra:Catalog):T{
  const supplement=<I extends {id:string}>(a:I[],b:I[])=>[...a,...b.filter(item=>!a.some(old=>old.id===item.id))];
- return {...base,equipment:supplement(base.equipment,extra.equipment),checklists:supplement(base.checklists,extra.checklists)};
+ return {...base,equipment:supplement(base.equipment,extra.equipment).filter(equipment=>!equipment.isStatutoryTarget),checklists:supplement(base.checklists,extra.checklists)};
 }
 export async function loadCatalog():Promise<Catalog>{
  async function rows(table:string){const all:unknown[]=[];for(let from=0;;from+=500){const {data,error}=await supabase.from(table).select('body').order('id').range(from,from+499);if(error)throw Error(readableError(error));all.push(...(data||[]).map(row=>row.body));if(!data||data.length<500)return all;}}
