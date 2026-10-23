@@ -1,9 +1,10 @@
 import {flowLabels,type FlowEvent} from './workflow';
+import {workflowRequester} from './workflow-requester';
 import './workflow.css';
 const stamp=(s:string)=>new Date(s).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
 export default function WorkflowTrail({events,ids}:{events:FlowEvent[];ids:Set<string>}){
  const history=events.filter(e=>ids.has(e.entity_id));
- const last=(stages:string[])=>history.filter(e=>stages.includes(e.stage)).at(-1);
+ const last=(stages:string[])=>stages.includes('request')?workflowRequester(history):history.filter(e=>stages.includes(e.stage)).at(-1);
  const stages=[['요청자',['request']],['접수자',['accept']],['승인자',['approve']],['완료자',['complete','inspection']]] as const;
  return <section className="workflow-trail" aria-label="단계별 실제 처리자"><h3>요청 → 접수 → 승인 → 완료</h3><div className="workflow-steps">{stages.map(([label,keys])=>{const e=last([...keys]);return <div key={label} className={'workflow-step '+(label==='요청자'?'request':label==='승인자'?'approval':'facility')}><small>{e&&(label==='완료자')?flowLabels[e.stage]:label}</small><b>{e?.actor_name||'처리 이력 없음'}</b><small>{e?stamp(e.occurred_at):'미처리 또는 기존 이력 미수집'}</small>{e?.recovered&&<small>기존 저장 정보로 확인</small>}</div>;})}</div><details><summary>상세 처리 이력 {history.length}건</summary><ol>{history.map(e=><li key={e.id}><b>{flowLabels[e.stage]} · {e.actor_name}</b><span>{stamp(e.occurred_at)} · {e.evidence}</span></li>)}</ol><p>이름은 처리 당시 계정 기준입니다. 담당자로 지정된 사람과 실제 처리자는 다를 수 있습니다. 점검 완료와 수리 완료는 별도 단계이며, 승인 없이 점검만 완료된 요청은 승인 이력이 없을 수 있습니다.</p></details></section>;
 }
