@@ -1,5 +1,5 @@
 import {Clock3,CalendarDays,ShieldCheck,TriangleAlert,Wrench,ArrowRight} from 'lucide-react';
-import {assessPlan,defaultPlan,normalizePlan,workIntervalMinutes,type MaintenancePolicy,type WorkPlan} from './maintenance';
+import {needsSpecialReview,assessPlan,defaultPlan,normalizePlan,workIntervalMinutes,type MaintenancePolicy,type WorkPlan} from './maintenance';
 import './work-planning.css';
 import RoleZones from './RoleZones';
 export type PlanningRecord={id:string;type:string;title:string;equipmentName:string;status:string;assignee:string;date:string;planning?:WorkPlan};
@@ -42,7 +42,7 @@ export function PlanningBoard({records,policy,onOpen,onDelete}:{records:Planning
   {name:'08:00~09:30 작업',icon:Clock3,description:'근무일 90분 내 복구 · 계획된 작업',filter:(r:PlanningRecord)=>!!r.planning&&r.planning.window==='morning'&&assessPlan(r.planning,policy).morningEligible},
   {name:'일요일 긴급사후보전',icon:ShieldCheck,description:'불가피한 일요일 작업 · 사유와 관리자 승인',filter:(r:PlanningRecord)=>!!r.planning&&assessPlan(r.planning,policy).sundayEmergency},
   {name:'장기·별도 근무일 정지',icon:CalendarDays,description:'90분 초과 · 분할 및 생산 협의',filter:(r:PlanningRecord)=>!!r.planning&&(assessPlan(r.planning,policy).longWork||r.planning.window==='weekday')},
-  {name:'특별관리·검토',icon:ShieldCheck,description:'장기·고액·품질·생산 영향 확인',filter:(r:PlanningRecord)=>!!r.planning&&(assessPlan(r.planning,policy).special||r.planning.qualityImpact||r.planning.productionImpact||r.planning.approval==='검토요청')},
+  {name:'특별관리·검토',icon:ShieldCheck,description:'검토 대기·반려 작업 · 승인 완료 후 제외',filter:(r:PlanningRecord)=>needsSpecialReview(r.planning,policy)},
   {name:'계획 수립 필요',icon:TriangleAlert,description:'시간·예산·근무일 계획을 먼저 확인',filter:(r:PlanningRecord)=>!r.planning||!r.planning.plannedDate||r.planning.window==='unplanned'||r.planning.estimatedMinutes===null||r.planning.estimatedCost===null},
   {name:'유휴설비 관리',icon:Wrench,description:'안전·보존 중심 최소 비용 관리',filter:(r:PlanningRecord)=>!!r.planning&&(r.planning.idleEquipment||r.planning.category==='유휴설비관리')},
  ];
@@ -52,11 +52,11 @@ export function PlanningBoard({records,policy,onOpen,onDelete}:{records:Planning
 export function MaintenanceSummary({records,policy,onOrders,onProcedure}:{records:PlanningRecord[];policy:MaintenancePolicy;onOrders:()=>void;onProcedure:()=>void}){
  const ops=records.filter(r=>r.type==='workorder'),active=ops.filter(r=>r.status!=='완료');
  const morning=active.filter(r=>r.planning?.window==='morning'&&assessPlan(r.planning,policy).morningEligible);
- const special=active.filter(r=>r.planning&&assessPlan(r.planning,policy).special&&r.planning.approval!=='승인');
+ const special=active.filter(r=>needsSpecialReview(r.planning,policy));
  const long=active.filter(r=>r.planning&&assessPlan(r.planning,policy).longWork);
  const risk=active.filter(r=>r.planning?.qualityImpact||r.planning?.productionImpact);
  const monthly=ops.filter(r=>r.date.slice(0,7)===policy.costPeriod),known=monthly.filter(r=>r.planning?.actualCost!=null);
  const spend=known.reduce((sum,r)=>sum+(r.planning?.actualCost??0),0),missing=monthly.length-known.length;
  const ratio=policy.manufacturingCost&&known.length?`${(spend/policy.manufacturingCost*100).toFixed(2)}%`:'집계 기준 확인';
- return <><div className="maintenance-purpose"><div><span className="eyebrow">목적 → 정책 → 계획 → 실행 → 검증</span><h2>필요한 설비를 정상으로, 보전비는 합리적으로</h2><p>월~토 08:00~09:30 활용 · 일요일 일반 작업 제외 · 긴급 작업 별도 승인 · 고액 기준 {policy.highCostThreshold===null?'미설정':money(policy.highCostThreshold)+' 이상'}</p></div><button className="secondary" onClick={onProcedure}>설비보전 절차서 ↗</button></div><div className="maintenance-metrics">{[['08:00~09:30 계획',morning.length,'90분 내 복구 예정'],['특별관리 승인 대기',special.length,'장기·고액 작업'],['90분 초과 작업',long.length,'별도 근무일 정지 검토'],['품질·생산 영향',risk.length,'확인·복구 시험 필요']].map(([label,value,note])=><button key={String(label)} onClick={onOrders}><span>{label}</span><b>{value}<small>건</small></b><p>{note}</p></button>)}</div><section className="maintenance-cost"><div><span>{policy.costPeriod} 실제 보전비 / 제조원가</span><b>{ratio}</b></div><p>{known.length?`${money(spend)} · 실제비용 입력 ${known.length}건`:'해당 월 실제비용 입력 전'} · 미입력 {missing}건{missing>0?' · 부분 집계':''}<br/>작업 기록 일자 기준이며, 과거 ERP 수선비 원장과 합산하지 않습니다.</p></section></>;
+ return <><div className="maintenance-purpose"><div><span className="eyebrow">목적 → 정책 → 계획 → 실행 → 검증</span><h2>필요한 설비를 정상으로, 보전비는 합리적으로</h2><p>월~토 08:00~09:30 활용 · 일요일 일반 작업 제외 · 긴급 작업 별도 승인 · 고액 기준 {policy.highCostThreshold===null?'미설정':money(policy.highCostThreshold)+' 이상'}</p></div><button className="secondary" onClick={onProcedure}>설비보전 절차서 ↗</button></div><div className="maintenance-metrics">{[['08:00~09:30 계획',morning.length,'90분 내 복구 예정'],['특별관리 승인 대기',special.length,'장기·고액·영향 검토'],['90분 초과 작업',long.length,'별도 근무일 정지 검토'],['품질·생산 영향',risk.length,'확인·복구 시험 필요']].map(([label,value,note])=><button key={String(label)} onClick={onOrders}><span>{label}</span><b>{value}<small>건</small></b><p>{note}</p></button>)}</div><section className="maintenance-cost"><div><span>{policy.costPeriod} 실제 보전비 / 제조원가</span><b>{ratio}</b></div><p>{known.length?`${money(spend)} · 실제비용 입력 ${known.length}건`:'해당 월 실제비용 입력 전'} · 미입력 {missing}건{missing>0?' · 부분 집계':''}<br/>작업 기록 일자 기준이며, 과거 ERP 수선비 원장과 합산하지 않습니다.</p></section></>;
 }

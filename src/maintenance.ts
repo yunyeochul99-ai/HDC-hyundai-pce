@@ -134,6 +134,13 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   return { errors, warnings, longWork, highCost, budgetReview, special, requiresApproval, morningEligible: hasDate && plan.estimatedMinutes !== null && plan.estimatedMinutes > 0 && plan.estimatedMinutes <= 90 && !weekend, weekend, sundayEmergency };
 }
 
+/** Review inbox, rather than a permanent list of every approved risk flag. */
+export function needsSpecialReview(plan: WorkPlan | undefined, policy: MaintenancePolicy): boolean {
+  if (!plan || plan.approval === '승인') return false;
+  return assessPlan(plan, policy).special || plan.qualityImpact || plan.productionImpact
+    || plan.approval === '검토요청' || plan.approval === '반려';
+}
+
 export async function getPolicy(): Promise<MaintenancePolicy> {
   const { data, error } = await supabase.from('hdc_v2_maintenance_policy').select('payload').eq('key', 'factory').maybeSingle();
   if (error) throw new Error(readableError(error));
