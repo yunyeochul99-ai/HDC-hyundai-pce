@@ -18,3 +18,4 @@
 .completion-card{margin:14px 0;padding:20px}.completion-card p{line-height:1.7}.completion-card h3{margin-bottom:10px}
 
 @media print{.owner-records,.work-archive-panel{display:none!important}}
+.purge-record-form{margin-top:20px;padding:20px;border:1px solid #cc5c66;border-radius:8px;background:#fff8f8;color:#54272c}.purge-record-form label{display:block;margin:12px 0}.purge-record-form input{display:block;width:100%;box-sizing:border-box;padding:10px;margin-top:8px;border:1px solid #bbb;border-radius:6px;font:inherit}.purge-button{color:#a52232;border-color:#cc5c66}.purge-record-form h3{overflow-wrap:anywhere}
