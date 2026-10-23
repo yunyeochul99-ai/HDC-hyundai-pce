@@ -164,3 +164,7 @@ td b{color:#48616f;font-weight:600}tbody tr[tabindex]{cursor:pointer}.empty>svg{
 .inspection-hub .inspection-templates>.card.facility-review>.primary{background:#245a91;border-color:#245a91;color:#fff}
 .inspection-hub .inspection-templates>.card.facility-review>.primary:hover{background:#1b4776}
 
+/* Keep failed-save guidance next to the field, including inside scrolling dialogs. */
+[data-save-invalid] { outline: 3px solid #df1732 !important; outline-offset: 3px; scroll-margin-block: 100px; }
+label[data-save-error]::after { content: attr(data-save-error); display: block; color: #b41429; font-size: 12px; line-height: 1.5; margin-top: 6px; }
+#record-save-error:focus { outline: 2px solid #df1732; outline-offset: 3px; }
