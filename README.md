@@ -10,7 +10,8 @@
 | --- | --- |
 | 공개 저장소 | [yunyeochul99-ai/HDC-hyundai-pce](https://github.com/yunyeochul99-ai/HDC-hyundai-pce) |
 | 배포 브랜치 | `main` |
-| 앱 URL | [hdc-hyundai-pce.netlify.app](https://hdc-hyundai-pce.netlify.app) |
+| 앱 URL | [hdc-hyundai-pce.pages.dev](https://hdc-hyundai-pce.pages.dev) · Cloudflare Pages |
+| 이전 주소 | [hdc-hyundai-pce.netlify.app](https://hdc-hyundai-pce.netlify.app) · 보존용 |
 | Supabase 프로젝트 URL | `https://pcaporgqhzzwzfgkxars.supabase.co` |
 | Node | `22` 이상, 패키지 요구 버전 `22.13.0` 이상 |
 | 패키지 관리 | `pnpm` · `pnpm-lock.yaml` 포함 |
@@ -27,7 +28,9 @@ pnpm run build
 pnpm run preview
 ```
 
-`build`는 TypeScript 검사 후 정적 파일을 `dist`에 생성합니다. `netlify.toml`이 빌드와 SPA 경로 처리를 지정합니다. 저장소와 연결한 Netlify는 `main` 커밋을 받아 새로 빌드하도록 설정합니다.
+`build`는 TypeScript 검사 후 정적 파일을 `dist`에 생성합니다. Cloudflare Pages가 이 저장소의 `main` 변경을 자동 배포합니다. 빌드 명령은 `pnpm run build`, 출력 폴더는 `dist`, 환경 변수는 `NODE_VERSION=22`, `PNPM_VERSION=11.25.0`입니다. `public/_headers`가 캐시와 보안 헤더를 유지합니다. 기존 Netlify는 `netlify.toml`의 ignore 명령으로 자동 빌드를 건너뜁니다.
+
+새 주소에서 기존 계정으로 한 번 다시 로그인합니다. 계정·업무 기록·사진은 같은 Supabase를 사용합니다. 이전 주소에 남아 있는 미전송 임시 기록은 이전 주소에서 먼저 전송해야 하며 새 주소로 자동 이동하지 않습니다. 비밀번호 재설정 메일을 운영할 때는 Supabase의 허용 리디렉션 주소에도 새 주소를 추가합니다.
 
 ## 주요 파일
 
@@ -38,7 +41,8 @@ pnpm run preview
 | `src/backend.ts` | Supabase DB·사진 업로드·서명 URL 연결 |
 | `public-config.ts` | 프로젝트 URL과 브라우저용 publishable key |
 | `public/manifest.webmanifest`, `public/sw.js` | 홈 화면 설치와 앱 화면 캐시 |
-| `netlify.toml` | Node·빌드·배포·경로 설정 |
+| `public/_headers` | Cloudflare 정적 파일 캐시·보안 헤더 |
+| `netlify.toml` | 이전 Netlify 사이트 보존·자동 빌드 건너뛰기 |
 | `pnpm-lock.yaml` | 설치 의존성 잠금 파일 |
 
 ## 계정과 저장 권한
@@ -89,7 +93,9 @@ pnpm run preview
 
 2026-10-19 운영 사이트는 `hdc-hyundai-pce.netlify.app`, Supabase는 `pcaporgqhzzwzfgkxars`로 이전했습니다. 기존 계정·기록·사진·추가 양식을 보존하며, 이전 서버는 보존용입니다. 운영 DB를 초기화하거나 설치 SQL을 재실행하지 않습니다. 회사 원장과 운영 데이터는 이 공개 저장소에 포함하지 않았습니다.
 
-### 기존 Netlify 사이트의 자동 배포 원본 변경
+### 이전 Netlify 배포 설정 (전환 전 참고)
+
+2026-10-23 이후에는 Cloudflare Pages를 배포 대상으로 사용합니다. 아래 내용은 이전 설정 참고용이며 새 Netlify 배포를 실행하지 않습니다.
 
 GitHub 코드 반영과 Netlify 저장소 연결은 별도 작업입니다. 이 저장소에 코드를 반영한 것만으로 기존 사이트의 자동 배포 원본이 변경되지는 않습니다.
 

@@ -1,4 +1,6 @@
 [build]
+  # Primary hosting moves to Cloudflare. Preserve the old site without paid deploys.
+  ignore = "exit 0"
   command = "pnpm run build"
   publish = "dist"
 [build.environment]

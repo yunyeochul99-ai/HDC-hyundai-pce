@@ -6,7 +6,7 @@
 
 - 이 저장소를 최신 소스의 기준으로 사용합니다. 기존 `yunyeochul99-ai/HDC-PCE`에 업그레이드를 반영하지 않습니다.
 - 작업 전 원격 `main`의 최신 상태를 확인하고 사용자 변경을 보존합니다. 강제 푸시하지 않습니다.
-- 현재 운영 주소는 `https://hdc-hyundai-pce.netlify.app`입니다. GitHub 소스 반영과 Netlify 배포 성공 여부는 각각 확인하고 보고합니다.
+- 사용자 지정(2026-10-23): 이후 배포는 Cloudflare Pages를 사용합니다. 프로젝트는 `hdc-hyundai-pce`, 주소는 `https://hdc-hyundai-pce.pages.dev`입니다. GitHub `main` 반영과 Cloudflare 운영 배포 성공을 각각 확인하고 보고합니다. 기존 Netlify 주소는 보존하며 새 배포를 실행하지 않습니다.
 - 사용자 지정(2026-10-19): 운영 Supabase는 `pcaporgqhzzwzfgkxars`로 이전했습니다. 기존 계정·기록·사진·추가 점검 양식을 유지합니다. 원본 `mfqnaopqlerqddyomscv`는 보존용이며 임의로 운영 연결을 되돌리지 않습니다. 저장소 이름 변경을 이유로 DB를 초기화하거나 재설치하지 않습니다.
 - 실제 회사 기준자료·수선비 원장·운영 백업·사진·비공개 SQL·secret/service role key를 공개 저장소에 올리지 않습니다. `public-config.ts`에는 기존 브라우저용 공개 연결 설정만 둡니다.
 - 검증은 변경에 맞춰 수행합니다. 앱 코드 변경 시 TypeScript 검사와 프로덕션 빌드를 확인합니다.
@@ -18,8 +18,9 @@
 - Node 22, pnpm (`packageManager`와 잠금 파일 기준)
 - 빌드: `pnpm run build`
 - 배포 폴더: `dist`
-- 설정: 루트 `netlify.toml`
-- GitHub 저장소를 연결하는 것만으로 Netlify의 자동 배포 원본이 변경되지는 않습니다. 실제 Netlify 연결 상태를 확인하기 전 변경 완료라고 보고하지 않습니다.
+- Cloudflare Pages: GitHub `yunyeochul99-ai/HDC-hyundai-pce`의 `main`, 빌드 명령 `pnpm run build`, 출력 `dist`, 환경 변수 `NODE_VERSION=22`, `PNPM_VERSION=11.25.0`.
+- `public/_headers`는 캐시·보안 헤더를 설정합니다. `netlify.toml`의 `ignore = "exit 0"`는 기존 Netlify 자동 빌드를 건너뛰어 크레딧 소모를 줄입니다. 전환 커밋에는 `[skip netlify]`도 사용합니다.
+- 주소가 바뀌어도 기존 로그인 계정 식별자와 Supabase 연결을 변경하지 않습니다. 새 주소에서는 한 번 다시 로그인해야 하며, 이전 주소의 미전송 기기 임시 기록은 이전 주소에서 전송해야 합니다.
 
 ## 수정 완료 전 필수 종합 검토
 
