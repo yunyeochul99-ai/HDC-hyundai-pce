@@ -10,6 +10,18 @@ export const statutoryFields = [
 ] as const;
 export type StatutoryKey = typeof statutoryFields[number][0];
 export type StatutoryDetails = Record<StatutoryKey, string> & { evidence: string };
+export function validStatutoryDate(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value+'T00:00:00Z')) && new Date(value+'T00:00:00Z').toISOString().slice(0,10) === value;
+}
+export function sortStatutoryPlans<T extends {id:string;title:string;evidence?:string}>(plans: T[]): T[] {
+  const date=(plan:T)=>{const value=readStatutoryDetails(plan.evidence).nextDate;return validStatutoryDate(value)?value:'9999-99-99';};
+  return [...plans].sort((a,b)=>date(a).localeCompare(date(b))||a.title.localeCompare(b.title,'ko')||a.id.localeCompare(b.id));
+}
+export function statutoryTiming(nextDate: string, today: string): {label:string;tone:string;days:number|null} {
+  if (!validStatutoryDate(nextDate) || !validStatutoryDate(today)) return {label:'날짜 미등록',tone:'neutral',days:null};
+  const days=Math.round((Date.parse(nextDate+'T00:00:00Z')-Date.parse(today+'T00:00:00Z'))/86400000);
+  return days<0?{label:`${-days}일 경과`,tone:'red',days}:days===0?{label:'오늘',tone:'amber',days}:days<=30?{label:`${days}일 후`,tone:'amber',days}:{label:`${days}일 후`,tone:'blue',days};
+}
 export function readStatutoryDetails(evidence = ''): StatutoryDetails {
   const empty = Object.fromEntries(statutoryFields.map(([key]) => [key, ''])) as Record<StatutoryKey, string>;
   if (evidence.startsWith(prefix)) {
@@ -30,7 +42,7 @@ export function writeStatutoryDetails(details: StatutoryDetails): string {
   }
   for (const key of ['lastDate', 'nextDate'] as const) {
     const value = details[key];
-    if (value && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value+'T00:00:00Z')) || new Date(value+'T00:00:00Z').toISOString().slice(0,10) !== value))
+    if (value && !validStatutoryDate(value))
       throw Error('검사일을 올바른 날짜로 입력하세요.');
   }
   if (details.lastDate && details.nextDate && details.nextDate < details.lastDate)
