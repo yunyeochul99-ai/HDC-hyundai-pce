@@ -40,3 +40,10 @@ test('timing handles today, overdue, the 30-day boundary and leap years',()=>{
  assert.equal(statutoryTiming('2027-02-30','2026-10-23').days,null);
  assert.equal(statutoryTiming('','2026-10-23').days,null);
 });
+test('completion schedule sorts recent inspection dates newest first, leaving missing dates last',()=>{
+ const plan=(id,lastDate,nextDate)=>({id,title:id,evidence:writeStatutoryDetails({...readStatutoryDetails(),lastDate,nextDate})});
+ const plans=[plan('old','2025-02-13','2027-02-13'),plan('missing','',''),plan('recent','2026-09-08','2028-09-18'),plan('middle','2026-04-07','2028-06-16')];
+ assert.deepEqual(sortStatutoryPlans(plans,'lastDate',true).map(p=>p.id),['recent','middle','old','missing']);
+ assert.deepEqual(sortStatutoryPlans(plans).map(p=>p.id),['old','middle','recent','missing']);
+ assert.equal(readStatutoryDetails(plans[2].evidence).nextDate,'2028-09-18');
+});

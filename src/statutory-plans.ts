@@ -13,9 +13,12 @@ export type StatutoryDetails = Record<StatutoryKey, string> & { evidence: string
 export function validStatutoryDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value+'T00:00:00Z')) && new Date(value+'T00:00:00Z').toISOString().slice(0,10) === value;
 }
-export function sortStatutoryPlans<T extends {id:string;title:string;evidence?:string}>(plans: T[]): T[] {
-  const date=(plan:T)=>{const value=readStatutoryDetails(plan.evidence).nextDate;return validStatutoryDate(value)?value:'9999-99-99';};
-  return [...plans].sort((a,b)=>date(a).localeCompare(date(b))||a.title.localeCompare(b.title,'ko')||a.id.localeCompare(b.id));
+export function sortStatutoryPlans<T extends {id:string;title:string;evidence?:string}>(plans: T[],field:'nextDate'|'lastDate'='nextDate',descending=false): T[] {
+  const date=(plan:T)=>readStatutoryDetails(plan.evidence)[field];
+  return [...plans].sort((a,b)=>{
+    const av=date(a),bv=date(b),validA=validStatutoryDate(av),validB=validStatutoryDate(bv);
+    return Number(validB)-Number(validA)||(validA&&validB?(descending?-1:1)*av.localeCompare(bv):0)||a.title.localeCompare(b.title,'ko')||a.id.localeCompare(b.id);
+  });
 }
 export function statutoryTiming(nextDate: string, today: string): {label:string;tone:string;days:number|null} {
   if (!validStatutoryDate(nextDate) || !validStatutoryDate(today)) return {label:'날짜 미등록',tone:'neutral',days:null};
