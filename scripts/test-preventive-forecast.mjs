@@ -34,7 +34,7 @@ test('three unique completion dates yield a review candidate, never overwrite co
 test('incomplete/group/unapproved plans are explicit gaps; legal and archived plans are excluded',()=>{
  const p={...plan,equipment:'GROUP',catalogState:'pending',checklist:[],evidence:''};
  const row=buildForecast([p],[],'2026-10-23',equipment)[0];assert.equal(row.due,'');assert.equal(row.issues.length,6);
- assert.equal(buildForecast([{...plan,method:'법정검사'},{...plan,catalogState:'archived'}],[],'2026-10-23',equipment).length,0);
+ assert.equal(buildForecast([{...plan,method:'법정검사'},{...plan,method:'법정'},{...plan,catalogState:'archived'}],[],'2026-10-23',equipment).length,0);
 });
 test('manual corrections are used only when valid and not in the future; deterministic sorting does not mutate input',()=>{
  const input=[{...plan,id:'Z',evidence:writeForecast({...settings,lastDate:'2027-01-01'},'')},plan];

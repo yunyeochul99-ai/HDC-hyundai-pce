@@ -33,7 +33,7 @@ export function forecastWorkDate(due:string){
 export type ForecastRecord={id:string;type:string;status:string;equipmentId:string;preventivePlanId?:string;note?:string;planning?:{actualEndAt?:string};items?:{result:string}[]};
 export function buildForecast(plans:ManagedPlan[],records:ForecastRecord[],today:string,availableEquipment:Set<string>){
  if(!validForecastDate(today))throw Error('조회 기준일을 확인하세요.');
- return plans.filter(p=>p.catalogState!=='archived'&&!/^법정\s*검사$/.test(p.method.trim())).map(plan=>{
+ return plans.filter(p=>p.catalogState!=='archived'&&!/^법정(?:\s*검사)?$/.test(p.method.trim())).map(plan=>{
   const {settings}=readForecast(plan.evidence);
   const linked=records.filter(r=>r.type==='workorder'&&r.equipmentId===plan.equipment&&r.preventivePlanId===plan.id);
   const completions=linked.filter(r=>r.status==='완료');
