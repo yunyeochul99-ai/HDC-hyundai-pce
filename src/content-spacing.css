@@ -1,0 +1,25 @@
+:root{--panel-inset:24px;--content-gap:16px}
+.main-content .card-heading{padding:16px var(--panel-inset)}
+.main-content .source-row{padding-right:var(--panel-inset);padding-left:var(--panel-inset)}
+.main-content .preventive-manager .plan-card{padding:var(--panel-inset)}
+.report-content.management-report>section.card{padding:var(--panel-inset)}
+.report-content.management-report>section.card.workflow-kpi{padding:var(--panel-inset)!important}
+.report-content.management-report>section.card>h2{margin:0 0 8px;line-height:1.5}
+.report-content.management-report>section.card>h3{margin:24px 0 12px;line-height:1.5}
+.report-content.management-report>section.card>p{margin:10px 0;line-height:1.8}
+.management-report .button-row{gap:12px;margin:16px 0}
+.management-report .report-metrics{margin:20px 0 24px}
+.management-report .report-data-note{padding:14px 16px}
+.management-report .table-wrap{margin:12px 0 20px}
+.management-report .report-source{margin-top:24px;padding-top:16px}
+:is(.maintenance-calendar,.source-inventory,.spare-parts,.preventive-forecast).card{padding:var(--panel-inset)}
+:is(.maintenance-calendar,.source-inventory,.spare-parts,.preventive-forecast).card>.card-heading{padding:0 0 var(--content-gap);min-height:0;align-items:flex-start}
+:is(.maintenance-calendar,.source-inventory,.spare-parts,.preventive-forecast).card>.section-title{margin:0 0 var(--content-gap)}
+:is(.maintenance-calendar,.source-inventory,.spare-parts,.preventive-forecast) h2{font-size:16px;line-height:1.5}
+:is(.maintenance-calendar,.source-inventory,.spare-parts,.preventive-forecast)>.footnote{margin:10px 0;line-height:1.8}
+:is(.source-inventory,.spare-parts,.preventive-forecast) label{display:grid;gap:6px;font-size:12px}
+:is(.source-inventory,.spare-parts,.preventive-forecast) :is(input,select){width:100%;min-height:38px;padding:9px 10px;border:1px solid #dce3e8;border-radius:6px;font:inherit;background:#fff}
+:is(.source-inventory,.spare-parts)>.pm-controls{margin:16px 0}
+.forecast-row,.spare-row{padding:18px 0}
+@media(max-width:620px){:root{--panel-inset:16px;--content-gap:12px}.report-content.management-report>section.card>h3{margin-top:20px}:is(.maintenance-calendar,.source-inventory,.spare-parts,.preventive-forecast) h2{font-size:14px}.source-inventory>.card-heading,.spare-parts>.card-heading{flex-direction:column;gap:12px}}
+@media print{.report-content.management-report>section.card{padding:0;border:0}.report-content.management-report>section.card.workflow-kpi{padding:0!important}}

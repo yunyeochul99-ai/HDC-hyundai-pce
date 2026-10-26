@@ -19,7 +19,7 @@ export default function PurgeRecordForm({record,onCancel,onDeleted}:{record:{id:
   return <form ref={form} className="purge-record-form" onSubmit={submit}>
     <h3>삭제 보관 기록 완전 삭제</h3>
     <p><b>{record.title}</b><br/>{record.equipmentName}</p>
-    <p className="error-msg">이 기록의 본문·작업계획·변경 이력을 영구 삭제하며 복원할 수 없습니다. 연결된 다른 기록과 사진 파일은 유지합니다.</p>
+    <p className="error-msg">이 기록의 본문·작업계획·변경 이력을 영구 삭제하며 복원할 수 없습니다. 연결된 다른 기록과 사진 파일은 유지합니다. 요청서만 삭제하면 별도로 저장된 원본 점검은 실적에 남습니다. 테스트 기록 정리는 전체 업무 기록에서 원본 점검도 확인하세요.</p>
     <label>완전 삭제 사유<textarea required disabled={busy} maxLength={1000} value={reason} onChange={e=>setReason(e.target.value)}/></label>
     <label>확인을 위해 ‘완전 삭제’를 입력하세요<input required disabled={busy} autoComplete="off" value={confirmation} onChange={e=>setConfirmation(e.target.value)}/></label>
     {error&&<p role="alert" className="error-msg">{error}</p>}
