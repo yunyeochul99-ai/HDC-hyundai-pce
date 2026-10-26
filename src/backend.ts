@@ -1,3 +1,4 @@
+import {canonicalPlanId,canonicalPlanRecord} from './plan-code';
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '../public-config';
 
@@ -124,8 +125,9 @@ export async function appFetch(path: string, init: RequestInit = {}): Promise<Re
       const { data, error } = await supabase.from('hdc_v2_seed').select('payload,updated_at').eq('key', 'factory').maybeSingle();
       if (error) return errorResponse(error);
       if (!data?.payload) return response({ error: '공장 기준자료가 아직 등록되지 않았습니다. 관리자가 비공개 seed-data.json을 등록해야 합니다.' }, 404);
-      seedCache.set(user.id, { payload: data.payload as JsonObject, loadedAt: Date.now() });
-      return response(data.payload);
+      const payload={...data.payload,workorders:(data.payload.workorders||[]).map((p:JsonObject)=>({...p,id:canonicalPlanId(String(p.id))}))};
+      seedCache.set(user.id, { payload: payload as JsonObject, loadedAt: Date.now() });
+      return response(payload);
     }
     if (path === '/api/records' && method === 'GET') {
       const records: unknown[] = [];
@@ -134,7 +136,7 @@ export async function appFetch(path: string, init: RequestInit = {}): Promise<Re
       for (;;) {
         const { data, error } = await supabase.from('hdc_v2_records').select('body,owner_id').order('updated_at', { ascending: false }).order('id', { ascending: true }).range(start, start + pageSize - 1);
         if (error) return errorResponse(error);
-        records.push(...(data || []).map((row) => row.body));
+        records.push(...(data || []).map((row) => canonicalPlanRecord(row.body)));
         if (activeAccount === user.id) (data || []).forEach((row) => {
           if (row.body?.id && typeof row.owner_id === 'string') recordOwners.set(row.body.id, row.owner_id);
         });
@@ -150,7 +152,7 @@ export async function appFetch(path: string, init: RequestInit = {}): Promise<Re
         parsed = JSON.parse(init.body) as { record?: unknown };
       } catch { return response({ error: '기록 JSON 형식을 확인하세요.' }, 400); }
       if (!parsed.record || typeof parsed.record !== 'object') return response({ error: '저장할 기록이 없습니다.' }, 400);
-      const { data, error } = await supabase.rpc('hdc_v2_save_record', { p_record: parsed.record });
+      const { data, error } = await supabase.rpc('hdc_v2_save_record', { p_record: canonicalPlanRecord(parsed.record as JsonObject) });
       if (error) return errorResponse(error);
       if (activeAccount === user.id && data?.id && !recordOwners.has(data.id)) recordOwners.set(data.id, user.id);
       return response({ record: data });
