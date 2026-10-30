@@ -44,3 +44,5 @@
 
 
 예비품의 공장장 수정값은 hdc_v2_spare_overrides에 원본과 분리해 저장하며 원본 가져오기로 덮어쓰거나 초기화하지 않습니다. 항목 ID를 보존하고 수정 이력은 비공개로 유지합니다. 원본 기재 수량과 실사 수량, 원본 금액과 관리 단가를 구분합니다.
+
+공장 배치도는 hdc_v2_seed factory의 payload.factoryLayout에 비공개로 보관합니다. 원본 구역과 별도 구역을 구분하고, 위치 미확인 설비는 임의 배치하지 않습니다. 공장장 위치 수정값·버전은 hdc_v2_layout_positions 및 비공개 이력에서 보존합니다. 자료 가져오기는 factoryLayout/sourceInventory/spareParts를 덮어쓰지 않습니다. 지도 색은 등록 업무 상태이며 설비 정상 판정이나 실시간 이동 위치가 아닙니다.

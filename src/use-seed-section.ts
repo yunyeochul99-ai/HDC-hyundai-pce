@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {supabase,readableError} from './backend';
 /** Read only an approved user's private seed section; never bundle source files. */
-export function useSeedSection<T>(key:'sourceInventory'|'spareParts',initial?:T){
+export function useSeedSection<T>(key:'sourceInventory'|'spareParts'|'factoryLayout',initial?:T){
  const [value,setValue]=useState<T|undefined>(initial),[error,setError]=useState(''),[loading,setLoading]=useState(false);
  const request=useRef(0),version=useRef('');
  async function reload(force=true){
