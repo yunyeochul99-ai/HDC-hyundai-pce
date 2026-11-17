@@ -1,0 +1,1 @@
+export function workCostLabel(category:string,oldModel=''){return category==='설비교체'||category==='신규설치'&&oldModel.trim()?'교체·설치비':category==='신규설치'?'신규 구입·설치비':category==='설비해체'?'해체·철거비':category==='개선보전'?'개량·개선비':'보전비';}
