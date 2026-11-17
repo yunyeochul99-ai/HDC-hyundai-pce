@@ -1,6 +1,7 @@
 import { readableError, supabase } from './backend';
 
 export type WorkPlan = {
+  failurePart?:string;failureCause?:string;failureRemedy?:string;failureEvidence?:string;failureCauseStatus?:'미확인'|'추정'|'확인';downtimeStartAt?:string;downtimeEndAt?:string;
   category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리' | '긴급사후보전' | '신규설치' | '설비교체' | '설비해체';
   cmProcess?:string; cmPartner?:string; cmWaitReason?:string; cmStandardWork?:string; cmWaitBeforeMinutes?:number|null; cmWaitAfterMinutes?:number|null; cmQuantity?:number|null; cmWorkersBefore?:number|null; cmWorkersAfter?:number|null;
   cmBeforeMinutes?:number|null; cmAfterMinutes?:number|null; cmUnit?:string; cmEvidence?:string;
@@ -55,6 +56,7 @@ const numberOrNull = (value: unknown) => typeof value === 'number' && Number.isF
 export function normalizePlan(input: unknown): WorkPlan {
   const p = input && typeof input === 'object' && !Array.isArray(input) ? input as Record<string, unknown> : {};
   return {
+    failurePart:typeof p.failurePart==='string'?p.failurePart:'',failureCause:typeof p.failureCause==='string'?p.failureCause:'',failureRemedy:typeof p.failureRemedy==='string'?p.failureRemedy:'',failureEvidence:typeof p.failureEvidence==='string'?p.failureEvidence:'',failureCauseStatus:['미확인','추정','확인'].includes(p.failureCauseStatus as string)?p.failureCauseStatus as WorkPlan['failureCauseStatus']:'미확인',downtimeStartAt:typeof p.downtimeStartAt==='string'?p.downtimeStartAt:'',downtimeEndAt:typeof p.downtimeEndAt==='string'?p.downtimeEndAt:'',
     cmProcess:typeof p.cmProcess==='string'?p.cmProcess:'',cmPartner:typeof p.cmPartner==='string'?p.cmPartner:'',cmWaitReason:typeof p.cmWaitReason==='string'?p.cmWaitReason:'',cmStandardWork:typeof p.cmStandardWork==='string'?p.cmStandardWork:'',cmWaitBeforeMinutes:numberOrNull(p.cmWaitBeforeMinutes),cmWaitAfterMinutes:numberOrNull(p.cmWaitAfterMinutes),cmQuantity:numberOrNull(p.cmQuantity),cmWorkersBefore:numberOrNull(p.cmWorkersBefore),cmWorkersAfter:numberOrNull(p.cmWorkersAfter),
     cmBeforeMinutes:numberOrNull(p.cmBeforeMinutes),cmAfterMinutes:numberOrNull(p.cmAfterMinutes),cmUnit:typeof p.cmUnit==='string'?p.cmUnit:'',cmEvidence:typeof p.cmEvidence==='string'?p.cmEvidence:'',
     installExistingIssues:typeof p.installExistingIssues==='string'?p.installExistingIssues:'',installImprovements:typeof p.installImprovements==='string'?p.installImprovements:'',installExpectedEffect:typeof p.installExpectedEffect==='string'?p.installExpectedEffect:'',
@@ -95,6 +97,9 @@ export function isInstallation(plan: Pick<WorkPlan,'category'> | undefined){retu
 export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '접수'): PlanAssessment {
   const errors: string[] = [];
   const warnings: string[] = [];
+  for(const key of ['downtimeStartAt','downtimeEndAt'] as const)if(plan[key]&&!validWorkTimestamp(plan[key]!))errors.push('실제 설비 정지·재가동 날짜와 시각을 확인하세요.');
+  const stopped=workIntervalMinutes(plan.downtimeStartAt||'',plan.downtimeEndAt||'');if(stopped!==null&&stopped<=0)errors.push('재가동 시각은 실제 설비 정지 시작 이후여야 합니다.');
+  if(plan.failureCauseStatus==='확인'&&(!plan.failurePart?.trim()||!plan.failureCause?.trim()||!plan.failureEvidence?.trim()))errors.push('원인 확인 상태에는 고장 부위·원인·확인 근거를 입력하세요.');
   if(new TextEncoder().encode(JSON.stringify(plan)).length>12000)errors.push('작업 계획 입력량이 저장 한도를 넘었습니다. 개선 내용·실측 근거 등 긴 메모를 줄여주세요.');
   const hasDate = validDate(plan.plannedDate);
   const day = hasDate ? new Date(`${plan.plannedDate}T12:00:00Z`).getUTCDay() : -1;
