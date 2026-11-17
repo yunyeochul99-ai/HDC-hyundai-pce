@@ -1,0 +1,5 @@
+export type CMPlan={category?:string;cmBeforeMinutes?:number|null;cmAfterMinutes?:number|null;cmUnit?:string;cmEvidence?:string;actualEndAt?:string;installExistingIssues?:string;installImprovements?:string;installExpectedEffect?:string};
+export type CMRecord={id:string;type:string;equipmentName:string;title:string;status:string;assignee:string;planning?:CMPlan};
+export function cmResult(r:CMRecord){const p=r.planning,b=p?.cmBeforeMinutes,a=p?.cmAfterMinutes;if(p?.category!=='개선보전'||r.status!=='완료'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(p?.actualEndAt||'')||!validEnd(p?.actualEndAt||'')||b==null||a==null||!Number.isFinite(b)||!Number.isFinite(a)||b<=0||a<0||!p?.cmUnit?.trim()||!p.cmEvidence?.trim())return null;return {before:b,after:a,saved:b-a,percent:(b-a)/b*100};}
+
+function validEnd(s:string){const t=Date.parse(s+'+09:00');return Number.isFinite(t)&&new Date(t+9*3600000).toISOString().slice(0,16)===s;}

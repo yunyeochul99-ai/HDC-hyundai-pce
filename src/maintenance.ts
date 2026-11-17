@@ -2,7 +2,8 @@ import { readableError, supabase } from './backend';
 
 export type WorkPlan = {
   category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리' | '긴급사후보전' | '신규설치' | '설비교체' | '설비해체';
-  installOldModel?:string; installNewModel?:string; installInspection?:'미확인'|'예정'|'적합'|'해당없음'; installInspectionDate?:string; installNote?:string; installTrainingChecked?:boolean;
+  cmBeforeMinutes?:number|null; cmAfterMinutes?:number|null; cmUnit?:string; cmEvidence?:string;
+  installExistingIssues?:string; installImprovements?:string; installExpectedEffect?:string; installOldModel?:string; installNewModel?:string; installInspection?:'미확인'|'예정'|'적합'|'해당없음'; installInspectionDate?:string; installNote?:string; installTrainingChecked?:boolean;
   plannedDate: string;
   plannedStartAt: string;plannedEndAt: string;actualStartAt: string;actualEndAt: string;
   window: 'morning' | 'weekday' | 'unplanned' | 'sundayEmergency';
@@ -53,6 +54,8 @@ const numberOrNull = (value: unknown) => typeof value === 'number' && Number.isF
 export function normalizePlan(input: unknown): WorkPlan {
   const p = input && typeof input === 'object' && !Array.isArray(input) ? input as Record<string, unknown> : {};
   return {
+    cmBeforeMinutes:numberOrNull(p.cmBeforeMinutes),cmAfterMinutes:numberOrNull(p.cmAfterMinutes),cmUnit:typeof p.cmUnit==='string'?p.cmUnit:'',cmEvidence:typeof p.cmEvidence==='string'?p.cmEvidence:'',
+    installExistingIssues:typeof p.installExistingIssues==='string'?p.installExistingIssues:'',installImprovements:typeof p.installImprovements==='string'?p.installImprovements:'',installExpectedEffect:typeof p.installExpectedEffect==='string'?p.installExpectedEffect:'',
     installOldModel:typeof p.installOldModel==='string'?p.installOldModel:'',installNewModel:typeof p.installNewModel==='string'?p.installNewModel:'',installInspection:['미확인','예정','적합','해당없음'].includes(p.installInspection as string)?p.installInspection as WorkPlan['installInspection']:'미확인',installInspectionDate:typeof p.installInspectionDate==='string'?p.installInspectionDate:'',installNote:typeof p.installNote==='string'?p.installNote:'',installTrainingChecked:p.installTrainingChecked===true,
     category: (categories.includes(p.category as string) ? p.category : defaultPlan.category) as WorkPlan['category'],
     plannedDate: typeof p.plannedDate === 'string' ? p.plannedDate : '',
@@ -90,6 +93,7 @@ export function isInstallation(plan: Pick<WorkPlan,'category'> | undefined){retu
 export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '접수'): PlanAssessment {
   const errors: string[] = [];
   const warnings: string[] = [];
+  if(new TextEncoder().encode(JSON.stringify(plan)).length>12000)errors.push('작업 계획 입력량이 저장 한도를 넘었습니다. 개선 내용·실측 근거 등 긴 메모를 줄여주세요.');
   const hasDate = validDate(plan.plannedDate);
   const day = hasDate ? new Date(`${plan.plannedDate}T12:00:00Z`).getUTCDay() : -1;
   // Company workweek is Monday through Saturday; only Sunday is excluded.
