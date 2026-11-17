@@ -11,6 +11,10 @@ export function saveErrorFields(message: string, plan: Plan = {}): string[] {
   if (plan.estimatedCost == null) add('estimatedCost');
  }
  const rules: [RegExp, string[]][] = [
+  [/설치 검사일/, ['installInspectionDate']],
+  [/설치 검사 결과/, ['installInspection']],
+  [/설치 검사·인계 근거/, ['installNote']],
+  [/설치 교육·인계/, ['installTrainingChecked']],
   [/작업 예정일|달력 날짜|근무일 작업 예정일|계획일 또는/, ['plannedDate']],
   [/작업 시간대를|일요일 일반 작업|일요일 특별 작업은 일요일|일요일 날짜/, ['window']],
   [/보전 구분|긴급사후보전으로/, ['category']],
@@ -54,7 +58,7 @@ export function focusSaveError(form: HTMLFormElement, message: string, plan: Pla
   const fields = saveErrorFields(message, plan);
   const controls = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('[data-save-field]')];
   const candidates = controls.filter(control => fields.includes(control.dataset.saveField || '') && !control.disabled && !('readOnly' in control && control.readOnly) && control.getClientRects().length > 0);
-  const target = candidates.find(control => control.type === 'checkbox' ? !(control as HTMLInputElement).checked : !control.value || control.value === 'unplanned' || control.value === '미점검') || candidates[0];
+  const target = candidates.find(control => control.type === 'checkbox' ? !(control as HTMLInputElement).checked : !control.value || control.value === 'unplanned' || control.value === '미점검' || control.dataset.saveField === 'installInspection' && ['미확인','예정'].includes(control.value)) || candidates[0];
   const fallback = form.querySelector<HTMLElement>('#record-save-error');
   if (target) {
    target.setAttribute('aria-invalid', 'true');

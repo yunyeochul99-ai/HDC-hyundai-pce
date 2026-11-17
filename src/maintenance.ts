@@ -1,7 +1,8 @@
 import { readableError, supabase } from './backend';
 
 export type WorkPlan = {
-  category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리' | '긴급사후보전';
+  category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리' | '긴급사후보전' | '신규설치' | '설비교체' | '설비해체';
+  installOldModel?:string; installNewModel?:string; installInspection?:'미확인'|'예정'|'적합'|'해당없음'; installInspectionDate?:string; installNote?:string; installTrainingChecked?:boolean;
   plannedDate: string;
   plannedStartAt: string;plannedEndAt: string;actualStartAt: string;actualEndAt: string;
   window: 'morning' | 'weekday' | 'unplanned' | 'sundayEmergency';
@@ -43,7 +44,7 @@ export const defaultPolicy: MaintenancePolicy = {
   policyVersion: 0,
 };
 
-const categories = ['예방보전', '상태기반', '고장수리', '개선보전', '유휴설비관리', '긴급사후보전'];
+const categories = ['예방보전', '상태기반', '고장수리', '개선보전', '유휴설비관리', '긴급사후보전', '신규설치', '설비교체', '설비해체'];
 const approvals = ['미검토', '검토요청', '승인', '반려'];
 const windows = ['morning', 'weekday', 'unplanned', 'sundayEmergency'];
 const numberOrNull = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
@@ -52,6 +53,7 @@ const numberOrNull = (value: unknown) => typeof value === 'number' && Number.isF
 export function normalizePlan(input: unknown): WorkPlan {
   const p = input && typeof input === 'object' && !Array.isArray(input) ? input as Record<string, unknown> : {};
   return {
+    installOldModel:typeof p.installOldModel==='string'?p.installOldModel:'',installNewModel:typeof p.installNewModel==='string'?p.installNewModel:'',installInspection:['미확인','예정','적합','해당없음'].includes(p.installInspection as string)?p.installInspection as WorkPlan['installInspection']:'미확인',installInspectionDate:typeof p.installInspectionDate==='string'?p.installInspectionDate:'',installNote:typeof p.installNote==='string'?p.installNote:'',installTrainingChecked:p.installTrainingChecked===true,
     category: (categories.includes(p.category as string) ? p.category : defaultPlan.category) as WorkPlan['category'],
     plannedDate: typeof p.plannedDate === 'string' ? p.plannedDate : '',
     plannedStartAt:typeof p.plannedStartAt==='string'?p.plannedStartAt:'',plannedEndAt:typeof p.plannedEndAt==='string'?p.plannedEndAt:'',actualStartAt:typeof p.actualStartAt==='string'?p.actualStartAt:'',actualEndAt:typeof p.actualEndAt==='string'?p.actualEndAt:'',
@@ -83,6 +85,8 @@ function validDate(value: string) {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+export function isInstallation(plan: Pick<WorkPlan,'category'> | undefined){return !!plan&&['신규설치','설비교체','설비해체'].includes(plan.category);}
+
 export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '접수'): PlanAssessment {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -94,9 +98,18 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   const highCost = policy.highCostThreshold !== null && Math.max(plan.estimatedCost ?? -1,plan.actualCost ?? -1) >= policy.highCostThreshold;
   const budgetReview = policy.highCostThreshold === null;
   const sundayEmergency = weekend && plan.category === '긴급사후보전' && plan.window === 'sundayEmergency';
-  const special = longWork || highCost || sundayEmergency;
+  const special = isInstallation(plan) || longWork || highCost || sundayEmergency;
   const active = ['배정', '진행', '완료'].includes(status);
   const requiresApproval = special;
+  if(isInstallation(plan)){
+    if(plan.installInspectionDate&&!validDate(plan.installInspectionDate))errors.push('설치 검사일에 실제 달력 날짜를 입력하세요.');
+    if(status==='완료'){
+      if(!['적합','해당없음'].includes(plan.installInspection||''))errors.push('설치 검사 결과를 적합 또는 해당없음으로 확인하세요.');
+      if(plan.installInspection==='적합'&&!plan.installInspectionDate)errors.push('설치 검사일을 입력하세요.');
+      if(!plan.installNote?.trim())errors.push('설치 검사·인계 근거를 입력하세요.');
+      if(!plan.installTrainingChecked)errors.push('설치 교육·인계 확인을 완료하세요.');
+    }
+  }
   for(const [label,value] of [['계획 시작',plan.plannedStartAt],['계획 종료',plan.plannedEndAt],['실제 시작',plan.actualStartAt],['실제 종료',plan.actualEndAt]])if(value&&!validWorkTimestamp(value))errors.push(`${label} 날짜와 시각을 확인하세요.`);
   if(plan.window==='weekday'){
     if(!plan.plannedStartAt||!plan.plannedEndAt||!plan.actualStartAt||!plan.actualEndAt)warnings.push('정비 시작·종료 시각 중 미입력 항목이 있습니다. 저장 후 추후 입력할 수 있습니다.');
@@ -121,7 +134,7 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   if (['진행', '완료'].includes(status) && !plan.safetyChecked) errors.push('작업 전에 안전 확인을 완료하세요.');
   if (status === '완료' && (!plan.functionChecked || !plan.qualityChecked || !plan.productionHandedOver)) errors.push('완료 전 기능·품질 확인과 생산 인계를 모두 확인하세요.');
   if (status === '완료' && (plan.actualMinutes === null || plan.actualCost === null)) errors.push('완료 전에 실제 시간과 실제 비용을 입력하세요. 비용이 없으면 0원을 입력하세요.');
-  if (active && requiresApproval && plan.approval !== '승인') errors.push('장시간·고액·일요일 긴급 작업은 관리자 승인 후 배정·실행하세요.');
+  if (active && requiresApproval && plan.approval !== '승인') errors.push('신규설치·교체·해체 및 장시간·고액·일요일 긴급 작업은 관리자 승인 후 배정·실행하세요.');
   if (active && plan.approval === '반려') errors.push('반려된 작업은 계획을 보완하고 다시 검토받으세요.');
   if (sundayEmergency) warnings.push('일요일 긴급사후보전입니다. 관리자 승인과 현장 안전절차를 확인한 뒤 작업하세요.');
   if (longWork) warnings.push('90분을 넘는 작업입니다. 근무일 정지계획과 작업 분할·외주 필요성을 검토하세요.');
