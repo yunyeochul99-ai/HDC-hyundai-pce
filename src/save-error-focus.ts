@@ -11,6 +11,8 @@ export function saveErrorFields(message: string, plan: Plan = {}): string[] {
   if (plan.estimatedCost == null) add('estimatedCost');
  }
  const rules: [RegExp, string[]][] = [
+  [/CM 대기시간/, ['cmWaitBeforeMinutes','cmWaitAfterMinutes']],
+  [/CM 생산수량·투입 인원/, ['cmQuantity','cmWorkersBefore','cmWorkersAfter']],
   [/작업 계획 입력량|설치 개선 내용/, ['installExistingIssues','installImprovements','installExpectedEffect']],
   [/CM 비교 단위/, ['cmUnit','cmEvidence']],
   [/CM 전후 시간/, ['cmBeforeMinutes','cmAfterMinutes']],

@@ -2,6 +2,7 @@ import { readableError, supabase } from './backend';
 
 export type WorkPlan = {
   category: '예방보전' | '상태기반' | '고장수리' | '개선보전' | '유휴설비관리' | '긴급사후보전' | '신규설치' | '설비교체' | '설비해체';
+  cmProcess?:string; cmPartner?:string; cmWaitReason?:string; cmStandardWork?:string; cmWaitBeforeMinutes?:number|null; cmWaitAfterMinutes?:number|null; cmQuantity?:number|null; cmWorkersBefore?:number|null; cmWorkersAfter?:number|null;
   cmBeforeMinutes?:number|null; cmAfterMinutes?:number|null; cmUnit?:string; cmEvidence?:string;
   installExistingIssues?:string; installImprovements?:string; installExpectedEffect?:string; installOldModel?:string; installNewModel?:string; installInspection?:'미확인'|'예정'|'적합'|'해당없음'; installInspectionDate?:string; installNote?:string; installTrainingChecked?:boolean;
   plannedDate: string;
@@ -54,6 +55,7 @@ const numberOrNull = (value: unknown) => typeof value === 'number' && Number.isF
 export function normalizePlan(input: unknown): WorkPlan {
   const p = input && typeof input === 'object' && !Array.isArray(input) ? input as Record<string, unknown> : {};
   return {
+    cmProcess:typeof p.cmProcess==='string'?p.cmProcess:'',cmPartner:typeof p.cmPartner==='string'?p.cmPartner:'',cmWaitReason:typeof p.cmWaitReason==='string'?p.cmWaitReason:'',cmStandardWork:typeof p.cmStandardWork==='string'?p.cmStandardWork:'',cmWaitBeforeMinutes:numberOrNull(p.cmWaitBeforeMinutes),cmWaitAfterMinutes:numberOrNull(p.cmWaitAfterMinutes),cmQuantity:numberOrNull(p.cmQuantity),cmWorkersBefore:numberOrNull(p.cmWorkersBefore),cmWorkersAfter:numberOrNull(p.cmWorkersAfter),
     cmBeforeMinutes:numberOrNull(p.cmBeforeMinutes),cmAfterMinutes:numberOrNull(p.cmAfterMinutes),cmUnit:typeof p.cmUnit==='string'?p.cmUnit:'',cmEvidence:typeof p.cmEvidence==='string'?p.cmEvidence:'',
     installExistingIssues:typeof p.installExistingIssues==='string'?p.installExistingIssues:'',installImprovements:typeof p.installImprovements==='string'?p.installImprovements:'',installExpectedEffect:typeof p.installExpectedEffect==='string'?p.installExpectedEffect:'',
     installOldModel:typeof p.installOldModel==='string'?p.installOldModel:'',installNewModel:typeof p.installNewModel==='string'?p.installNewModel:'',installInspection:['미확인','예정','적합','해당없음'].includes(p.installInspection as string)?p.installInspection as WorkPlan['installInspection']:'미확인',installInspectionDate:typeof p.installInspectionDate==='string'?p.installInspectionDate:'',installNote:typeof p.installNote==='string'?p.installNote:'',installTrainingChecked:p.installTrainingChecked===true,
@@ -105,6 +107,7 @@ export function assessPlan(plan: WorkPlan, policy: MaintenancePolicy, status = '
   const special = isInstallation(plan) || longWork || highCost || sundayEmergency;
   const active = ['배정', '진행', '완료'].includes(status);
   const requiresApproval = special;
+  if(plan.category==='개선보전'){for(const [wait,total]of[[plan.cmWaitBeforeMinutes,plan.cmBeforeMinutes],[plan.cmWaitAfterMinutes,plan.cmAfterMinutes]])if(wait!=null&&total!=null&&wait>total)errors.push('CM 대기시간은 전체 처리시간 이하여야 합니다.');}
   if(isInstallation(plan)){
     if(plan.installInspectionDate&&!validDate(plan.installInspectionDate))errors.push('설치 검사일에 실제 달력 날짜를 입력하세요.');
     if(status==='완료'){
