@@ -168,3 +168,37 @@ td b{color:#48616f;font-weight:600}tbody tr[tabindex]{cursor:pointer}.empty>svg{
 [data-save-invalid] { outline: 3px solid #df1732 !important; outline-offset: 3px; scroll-margin-block: 100px; }
 label[data-save-error]::after { content: attr(data-save-error); display: block; color: #b41429; font-size: 12px; line-height: 1.5; margin-top: 6px; }
 #record-save-error:focus { outline: 2px solid #df1732; outline-offset: 3px; }
+
+
+/* Sidebar navigation is grouped by maintenance workflow. */
+.sidebar nav{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#294553 transparent}
+.sidebar nav .nav-dashboard,.sidebar nav .nav-group-toggle,.sidebar nav .nav-link{display:flex;width:100%;align-items:center;gap:10px;border:0;text-align:left}
+.sidebar nav .nav-dashboard,.sidebar nav .nav-link{min-height:39px;margin:2px 0;padding:8px 11px;border-radius:7px;background:transparent;color:#a9bec9;font-size:11px;font-weight:550}
+.sidebar nav .nav-dashboard{min-height:43px;margin-bottom:8px}
+.sidebar nav .nav-dashboard:hover,.sidebar nav .nav-link:hover{background:#1a3542;color:#fff}
+.sidebar nav .nav-dashboard.nav-active,.sidebar nav .nav-link.nav-active{background:#174c4d;color:#80e2c7;font-weight:650;box-shadow:inset 3px 0 #22baa0}
+.sidebar nav .nav-group{margin:2px 0 6px}
+.sidebar nav .nav-group-toggle{min-height:38px;margin:1px 0;padding:8px 11px;border-radius:7px;background:transparent;color:#7f9ca9;font-size:10px;font-weight:700;letter-spacing:.02em}
+.sidebar nav .nav-group-toggle:hover,.sidebar nav .nav-group-toggle.contains-active{background:#172f3c;color:#d2e4e8}
+.sidebar nav .nav-group-toggle>span,.sidebar nav .nav-link>span,.sidebar nav .nav-dashboard>span{min-width:0;flex:1}
+.sidebar nav .nav-group-toggle .nav-chevron{margin-left:auto;transition:transform .15s ease}
+.sidebar nav .nav-group-toggle .nav-chevron.expanded{transform:rotate(180deg)}
+.sidebar nav .nav-group-items{margin:0 0 3px 13px;padding-left:7px;border-left:1px solid #294653}
+.sidebar nav .nav-group-items .nav-link{gap:9px;min-height:36px;padding:7px 8px;font-size:10px}
+.sidebar nav .nav-group-items .nav-link>svg{width:16px;height:16px}
+.sidebar nav .nav-link>em,.sidebar nav .nav-group-toggle>em{margin-left:auto;padding:2px 6px;border-radius:10px;background:#294653;color:#c8dedf;font-size:9px;font-style:normal}
+.sidebar nav .nav-link.nav-active>em,.sidebar nav .nav-group-toggle.contains-active>em{background:#286461;color:#d8fff2}
+@media(max-width:1200px){.sidebar nav .nav-link,.sidebar nav .nav-dashboard,.sidebar nav .nav-group-toggle{gap:8px;padding-right:8px;padding-left:8px}.sidebar nav .nav-group-items{margin-left:9px;padding-left:5px}}
+@media(max-width:620px){
+ .mobile-nav{gap:2px}
+ .mobile-home,.mobile-nav-group{position:relative;min-width:0}
+ .mobile-nav .mobile-home,.mobile-nav .mobile-nav-group>button{display:flex;width:100%;min-width:0;min-height:44px;align-items:center;justify-content:center;flex-direction:column;gap:4px;padding:4px 1px;border-radius:6px;background:transparent;color:#8396a1;font-size:8px;line-height:1.1}
+ .mobile-nav .mobile-nav-group>button.selected,.mobile-nav .mobile-home.nav-active{background:#eff7f3;color:#158f73;font-weight:700}
+ .mobile-nav .mobile-nav-group>button.expanded{background:#f2f6f7;color:#435c6a}
+ .mobile-nav-menu{position:absolute;bottom:calc(100% + 8px);left:0;z-index:60;display:grid;gap:3px;width:min(280px,calc(100vw - 20px));max-height:min(65dvh,440px);overflow:auto;padding:7px;border:1px solid #dce5e8;border-radius:10px;background:#fff;box-shadow:0 8px 26px #1d354326}
+ .mobile-nav-group:nth-of-type(2) .mobile-nav-menu,.mobile-nav-group:nth-of-type(3) .mobile-nav-menu{left:50%;transform:translateX(-50%)}.mobile-nav-group:nth-of-type(n+4) .mobile-nav-menu{right:0;left:auto}
+ .mobile-nav .mobile-nav-menu button{display:flex;width:100%;min-height:40px;align-items:center;justify-content:flex-start;flex-direction:row;gap:9px;padding:8px 10px;border-radius:6px;background:#fff;color:#536977;text-align:left;font-size:11px;line-height:1.25}
+ .mobile-nav .mobile-nav-menu button.selected{background:#eaf7f2;color:#087b69;font-weight:700}
+ .mobile-nav .mobile-nav-menu button>span{min-width:0;flex:1}
+ .mobile-nav .mobile-nav-menu button>em{padding:2px 6px;border-radius:10px;background:#edf2f3;color:#607681;font-size:9px;font-style:normal}
+}
