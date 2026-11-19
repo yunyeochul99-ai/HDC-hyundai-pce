@@ -54,9 +54,9 @@ import {LayoutDashboard,ClipboardCheck,Wrench,Boxes,ChartNoAxesColumn,FileText,L
 type D=Record<string,any>;
 type Item={name:string;standard:string;result:string;value?:string;note?:string};
 type Rec={id:string;type:'inspection'|'workorder';equipmentId:string;equipmentName:string;title:string;status:string;priority:string;assignee:string;date:string;dueDate:string;note:string;items:Item[];photoIds:string[];photoDetails?:PhotoDetails;preventivePlanId?:string;version:number;createdAt?:string;updatedAt?:string;planning?:WorkPlan;inspectionRequestId?:string;sourceInspectionId?:string};
-const nav=[['overview','통합 대시보드','grid'],['procedure','설비보전 절차서','file'],['inspection','접수 [이상 발견·점검]','check'],['safety','안전점검','shield'],['issues','주요 이슈사항','alert'],['orders','계획 [보전 작업]','tool'],['cm','CM 개량보전','chart'],['fft','FFT 진동 분석','chart'],['pdm','예방보전 데이터','layers'],['statutory','계획 [법정 검사]','file'],['completion','완료 [보전 작업]','check'],['equipment','설비 자산','box'],['spares','예비품 목록','box'],['quotes','견적·업체','file'],['analytics','수선비 분석','chart'],['report','경영 보고','file'],['sources','자료와 설정','layers']];
+const nav=[['overview','통합 대시보드','grid'],['procedure','설비보전 절차서','file'],['inspection','접수 [이상 발견·점검]','check'],['orders','계획 [보전 작업]','tool'],['completion','완료 [보전 작업]','check'],['safety','안전점검','shield'],['issues','주요 이슈사항','alert'],['cm','CM 개량보전','chart'],['fft','FFT 진동 분석','chart'],['pdm','예방보전 데이터','layers'],['statutory','계획 [법정 검사]','file'],['equipment','설비 자산','box'],['spares','예비품 목록','box'],['quotes','견적·업체','file'],['analytics','수선비 분석','chart'],['report','경영 보고','file'],['sources','자료와 설정','layers']];
 const navGroups:{id:string;label:string;mobile:string;icon:string;items:string[]}[]=[
- {id:'work',label:'접수·작업',mobile:'작업',icon:'check',items:['inspection','safety','issues','orders','completion']},
+ {id:'work',label:'접수·작업',mobile:'작업',icon:'check',items:['inspection','orders','completion','safety','issues']},
  {id:'preventive',label:'예방·진단',mobile:'진단',icon:'tool',items:['statutory','pdm','fft','cm']},
  {id:'assets',label:'설비·자재',mobile:'자산',icon:'box',items:['equipment','spares','quotes']},
  {id:'reports',label:'분석·보고',mobile:'보고',icon:'chart',items:['analytics','report']},
