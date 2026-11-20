@@ -49,10 +49,11 @@
 .cad-badge{display:inline-block;padding:5px 8px;border-radius:5px;background:#173b4d;color:#d8eff0;font-size:9px;font-weight:800;letter-spacing:.12em}
 .cad-orbit-head h3{margin:9px 0 4px;font-size:17px;color:#173747}.cad-orbit-head p{margin:0;color:#617580;font-size:11px}
 .cad-view-controls{display:flex;flex-wrap:wrap;gap:6px}.cad-view-controls button{border:1px solid #cfdbdf;background:#fff;color:#294552;border-radius:7px;padding:8px 11px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}.cad-view-controls button:hover,.cad-view-controls button:focus-visible{border-color:#326779;background:#eaf3f4;outline:2px solid #7bb0b6}
+.cad-view-controls .cad-zoom-value{min-width:38px;align-self:center;text-align:center;color:#526c75;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
 .cad-orbit-grid{display:grid;grid-template-columns:1fr;gap:12px;padding:12px;background:#e9f0ef}
 .cad-model,.cad-orbit-foot{display:flex;justify-content:space-between;gap:10px;padding:0 16px 12px;color:#687c80;font-size:10px}.cad-label-list{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 13px}.cad-label-list button{display:flex;gap:10px;align-items:center;border:1px solid #cfdbdc;border-radius:7px;background:white;padding:7px 9px;color:#304c56;font-size:10px}.cad-label-list button:disabled{opacity:.65}.cad-label-list button span{color:#788a8e}.cad-source{padding:0 15px 14px;color:#60777d;font-size:10px;line-height:1.7}.cad-source summary{cursor:pointer;font-weight:700}.cad-scene-warning{margin:0 14px 14px;padding:10px;border-radius:7px;background:#fff3e0;color:#795411;font-size:11px}
 @media(max-width:820px){.cad-orbit-head{align-items:flex-start;flex-direction:column}.cad-orbit-grid{grid-template-columns:1fr}.cad-orbit-canvas{height:500px}.cad-orbit-foot{flex-direction:column}}
-@media(max-width:560px){.cad-orbit-grid{padding:7px;gap:8px}.cad-orbit-canvas{height:420px}.cad-view-controls button{padding:7px 8px}.cad-orbit-head{padding:15px}}
+@media(max-width:560px){.cad-orbit-grid{padding:7px;gap:8px}.cad-orbit-canvas{height:420px}.cad-view-controls{gap:4px}.cad-view-controls button{padding:6px 7px;font-size:10px}.cad-orbit-head{padding:15px}}
 
 /* Rich isometric factory and outdoor-yard scene */
 .scene-floorplan.scene-aerial{opacity:.96;mix-blend-mode:normal;filter:saturate(.92) contrast(1.06)}
