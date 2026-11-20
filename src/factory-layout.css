@@ -10,6 +10,7 @@
 .layout-scene-scroll{overflow:auto;background:linear-gradient(145deg,#f4f8fa,#e8f0f4)}
 .layout-scene{display:block;width:100%;min-width:680px;height:auto;overflow:visible}
 .scene-floorplan{opacity:.74;mix-blend-mode:multiply;pointer-events:none}
+
 .scene-roof{fill-opacity:.62}
 .scene-zone.attention .scene-roof{fill-opacity:.72}
 .scene-zone.running .scene-roof{fill-opacity:.72}
@@ -42,3 +43,30 @@
 .scene-caption{margin:0;padding:9px 12px;color:#627782;font-size:11px;line-height:1.6;background:#f7fafb}
 @media(max-width:900px){.layout-scenes{grid-template-columns:1fr}}
 @media(max-width:620px){.layout-mode button{padding-inline:9px}.layout-scene{min-width:720px}.layout-scene-card h3{align-items:flex-start;flex-direction:column;gap:4px}}
+
+/* Rich isometric factory and outdoor-yard scene */
+.scene-floorplan.scene-aerial{opacity:.96;mix-blend-mode:normal;filter:saturate(.92) contrast(1.06)}
+.scene-floorplan{opacity:.14;mix-blend-mode:multiply}
+.scene-floorplan.scene-aerial{opacity:.94;mix-blend-mode:normal;filter:saturate(.88) contrast(1.12) brightness(.88)}
+.scene-ground{stroke:#d8e3df;stroke-width:3}
+.scene-ground-outline{stroke:#e7f2ec;stroke-width:3;stroke-dasharray:3 10;opacity:.9}
+.scene-road-shadow{fill:none;stroke:#172a31;stroke-width:62;stroke-linecap:round;stroke-linejoin:round;opacity:.22;filter:blur(5px);pointer-events:none}
+.scene-road{fill:none;stroke:#626d70;stroke-width:50;stroke-linecap:round;stroke-linejoin:round;opacity:.92;pointer-events:none}
+.scene-road-mark{fill:none;stroke:#f2d887;stroke-width:2;stroke-dasharray:14 16;stroke-linecap:round;opacity:.9;pointer-events:none}
+.scene-tree{pointer-events:none;filter:drop-shadow(3px 5px 3px #15291d45)}
+.scene-tree ellipse{fill:#314d3a;opacity:.28}.scene-tree path{fill:#675a45}.scene-tree circle{fill:#42684a;stroke:#75946b;stroke-width:1}
+.scene-foundation{fill:#64787d;fill-opacity:.92;stroke:#d4e0dc;stroke-width:1.5}
+.scene-front{fill:#8b9fa4}.scene-side{fill:#657e86}
+.scene-door{fill:#304854;stroke:#d7e0de;stroke-width:1.2;opacity:.95}.scene-door-line{stroke:#b7c9ca;stroke-width:1;opacity:.8}
+.scene-roof{fill:url(#scene-roof);fill-opacity:.94;stroke:#637d85;stroke-width:2.2;transition:fill .15s,stroke-width .15s}
+.scene-roof-rib-fill{opacity:.65;pointer-events:none}.scene-roof-rib{stroke:#f8fbf8;stroke-width:1.3;opacity:.48;pointer-events:none}
+.scene-skylight{fill:#78b7c4;fill-opacity:.72;stroke:#e1f4f5;stroke-width:2}.scene-skylight-glint{stroke:#fff;stroke-width:2;opacity:.9}
+.scene-vent{fill:#647d84;stroke:#d7e1dd;stroke-width:1.2}.scene-vent+line{stroke:#e5ece8;stroke-width:1.4}
+.scene-pallet{filter:drop-shadow(2px 4px 2px #192f3233)}.scene-pallet polygon:nth-child(1){fill:#9aa8a6;stroke:#647371;stroke-width:.7}.scene-pallet polygon:nth-child(2){fill:#718582;stroke:#526765;stroke-width:.7}.scene-pallet polygon:nth-child(3){fill:#c9d0cb;stroke:#677773;stroke-width:.8}.scene-pallet line{stroke:#f4f2e8;stroke-width:2;opacity:.8}
+.scene-crane-bridge{stroke:#394d53;stroke-width:5;opacity:.8;pointer-events:none}.scene-crane-bridge line{stroke-linecap:round}
+.scene-zone-label rect{fill:#f7fbf9;fill-opacity:.97;stroke:#aec1bf;stroke-width:1.5;filter:drop-shadow(0 5px 5px #183b4a40)}
+.scene-zone-label text{fill:#143848;font-size:18px;font-weight:800}.scene-zone-label .scene-zone-count{fill:#526a70;font-size:12px;font-weight:650}
+.scene-status-dot{fill:#7a9299;stroke:#fff;stroke-width:1.5}.scene-status-dot.attention{fill:#df2643}.scene-status-dot.running{fill:#1680cc}.scene-status-dot.review{fill:#9a69ca}.scene-status-dot.planned{fill:#d39c36}.scene-status-dot.done{fill:#278c5e}
+.scene-compass circle{fill:#f8fcfa;stroke:#9bb4b7;stroke-width:2;filter:drop-shadow(0 3px 5px #29444c55)}.scene-compass path{fill:#d21b37}.scene-compass text{fill:#294750;font-size:12px;font-weight:800}
+.scene-sun circle{fill:#f4d489;fill-opacity:.72;stroke:#fff1ca;stroke-width:3}.scene-sun path{fill:none;stroke:#fff0c3;stroke-width:3;stroke-linecap:round;opacity:.8}
+.scene-caption{padding:12px 15px;background:#edf4f2;color:#425c62;font-size:11px;line-height:1.75}
