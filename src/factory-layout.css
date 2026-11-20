@@ -52,6 +52,7 @@
 .cad-view-controls .cad-zoom-value{min-width:38px;align-self:center;text-align:center;color:#526c75;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}.cad-model{display:block;position:relative;min-width:0;width:100%;padding:0 8px 12px;box-sizing:border-box}
 .cad-model-label{display:flex;justify-content:space-between;align-items:center;padding:0 4px 9px;color:#526c75;font-size:10px;font-weight:600}
 .cad-orbit-canvas{display:block;width:100%;height:clamp(560px,74vh,960px);min-height:520px;box-sizing:border-box;border:1px solid #cbd8d6;border-radius:10px;background:#dce7e9;touch-action:none}
+.cad-orbit-canvas{cursor:grab}.cad-orbit-canvas:active{cursor:grabbing}
 .cad-canvas-hint{display:inline-block;margin:7px 8px 0 2px;color:#657a80;font-size:10px}
 .cad-roof-toggle{display:inline-flex;align-items:center;gap:5px;color:#657a80;font-size:10px}
 .cad-orbit:fullscreen{display:flex;width:100vw;height:100vh;max-height:100vh;margin:0;border:0;border-radius:0;flex-direction:column;background:#eef3f2}
