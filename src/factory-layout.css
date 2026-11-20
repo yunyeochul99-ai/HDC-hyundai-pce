@@ -91,3 +91,5 @@
 .scene-compass circle{fill:#f8fcfa;stroke:#9bb4b7;stroke-width:2;filter:drop-shadow(0 3px 5px #29444c55)}.scene-compass path{fill:#d21b37}.scene-compass text{fill:#294750;font-size:12px;font-weight:800}
 .scene-sun circle{fill:#f4d489;fill-opacity:.72;stroke:#fff1ca;stroke-width:3}.scene-sun path{fill:none;stroke:#fff0c3;stroke-width:3;stroke-linecap:round;opacity:.8}
 .scene-caption{padding:12px 15px;background:#edf4f2;color:#425c62;font-size:11px;line-height:1.75}
+
+.pdm-proposals{margin:20px 0}.pdm-proposal-meta{display:grid;grid-template-columns:minmax(100px,.28fr) minmax(0,1fr);gap:0;margin:14px 0}.pdm-proposal-meta dt,.pdm-proposal-meta dd{margin:0;padding:9px;border-bottom:1px solid #e3e9e7;font-size:11px;line-height:1.7}.pdm-proposal-meta dt{color:#637984}.pdm-proposal-meta dd{color:#283f49;overflow-wrap:anywhere}@media(max-width:620px){.pdm-proposal-meta{grid-template-columns:1fr}.pdm-proposal-meta dt{padding-bottom:2px;border:0}.pdm-proposal-meta dd{padding-top:0}}
