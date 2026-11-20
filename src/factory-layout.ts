@@ -1,6 +1,7 @@
 import type {CalendarRecord} from './maintenance-calendar';
 export type LayoutZone={id:string;name:string;x?:number;y?:number;w?:number;h?:number};
-export type FactoryLayoutData={sourceFile:string;sourceDate:string;dateBasis:string;notice:string;cadReference?:{sourceFile:string;sourceDate:string;verifiedLabels:string[];note:string};aerialReference?:{image:string;sourceFile:string;capturedAt:string;frameTime:string;note:string};sheets:{id:string;name:string;width:number;height:number;image:string;labels:{text:string;x:number;y:number;w:number;h:number}[];zones:LayoutZone[]}[];extraZones:LayoutZone[];assignments:{equipmentId:string;zoneId:string;basis:string}[]};
+export type CadSceneData={sourceFile:string;sourceDate:string;sourceSha256:string;units:'mm';bounds:[number,number,number,number];walls:number[][][];paths:{kind:'site'|'machine'|'structure'|'walkway';points:number[][]}[];columns:number[][];labels:{text:string;x:number;y:number}[];note:string};
+export type FactoryLayoutData={sourceFile:string;sourceDate:string;dateBasis:string;notice:string;cadReference?:{sourceFile:string;sourceDate:string;verifiedLabels:string[];note:string};cadScene?:CadSceneData;aerialReference?:{image:string;sourceFile:string;capturedAt:string;frameTime:string;note:string};sheets:{id:string;name:string;width:number;height:number;image:string;labels:{text:string;x:number;y:number;w:number;h:number}[];zones:LayoutZone[]}[];extraZones:LayoutZone[];assignments:{equipmentId:string;zoneId:string;basis:string}[]};
 export type LayoutPosition={equipment_id:string;zone_id:string;version:number;reason:string;updated_at:string};
 export type LayoutEquipment={id:string;name:string;isStatutoryTarget?:boolean};
 export type LayoutWork=CalendarRecord&{priority?:string};
