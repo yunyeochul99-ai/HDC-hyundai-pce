@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 
 export type CadSceneData={
- sourceFile:string;sourceDate:string;sourceSha256:string;units:'mm';bounds:[number,number,number,number];
+ sourceFile:string;sourceDate:string;derivedFile:string;derivedFileSha256:string;units:'mm';bounds:[number,number,number,number];
  walls:number[][][];paths:{kind:'site'|'machine'|'structure'|'walkway';points:number[][]}[];
  columns:number[][];labels:{text:string;x:number;y:number}[];note:string;
 };
