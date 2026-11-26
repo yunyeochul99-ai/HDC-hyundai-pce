@@ -36,8 +36,15 @@ export default function CadOrbitScene({scene: originalScene,counts,zoneNames,onS
    return ()=>{active=false;};
  },[applicable,baseHash]);
  const scene=useMemo(()=>{
-   if(!originalScene || !applicable || !overlay) return originalScene;
-   return {...originalScene,paths:[...originalScene.paths,...overlay.map(points=>({kind:'site' as const,points}))]};
+   if(!originalScene || !applicable) return originalScene;
+   // Hide the two open box outlines adjacent to the upper/lower Yard 2 labels.
+   const paths=originalScene.paths.filter(path=>{
+     if(path.kind!=='structure'||path.points.length!==4)return true;
+     const [x,y]=path.points[0];
+     return !(Math.abs(y-873802.3815)<1 && [4904594.2380,4990484.9322].some(start=>Math.abs(start-x)<1));
+   });
+   if(!overlay)return {...originalScene,paths};
+   return {...originalScene,paths:[...paths,...overlay.map(points=>({kind:'site' as const,points}))]};
  },[originalScene,applicable,overlay]);
  async function openOverlay(file?:File){
    if(!file)return;
