@@ -91,6 +91,19 @@ export default function CadOrbitScene({scene: originalScene,counts,zoneNames,onS
    // The new DWG's column solids set the upper support datum; X girders and runway tracks sit directly above them.
    for(const column of columnModels)box(column.x-column.width/2,column.x+column.width/2,column.y-column.depth/2,column.y+column.depth/2,column.baseZ,column.topZ,['#96a8a1','#7d9089','#bdc9c1']);
    for(const girder of girders){const [x0,y0]=girder.a,[x1,y1]=girder.b;if(girder.axis==='X')box(Math.min(x0,x1),Math.max(x0,x1),y0-320,y0+320,supportZ-620,supportZ,['#748f92','#5d777b','#9aafb0']);}
+   // The C runway is continuous across two bays with no intermediate CAD column.
+   const cAxis=scene.gridAxes?.y.find(axis=>axis.label==='C');
+   const cTrack=runways.find(track=>track.row==='C' || (cAxis && Math.abs(track.a[1]-cAxis.coordinate)<500));
+   if(applicable && cAxis && cTrack){
+     const supports=columnModels.filter(column=>Math.abs(column.y-cAxis.coordinate)<1200).sort((a,b)=>a.x-b.x);
+     for(let i=1;i<supports.length;i++){
+       const left=supports[i-1],right=supports[i],span=right.x-left.x;
+       if(span<13000 || span>15000)continue;
+       if(girders.some(g=>g.axis==='X' && Math.abs(g.a[1]-cAxis.coordinate)<1200 && Math.min(g.a[0],g.b[0])<right.x-1000 && Math.max(g.a[0],g.b[0])>left.x+1000))continue;
+       const top=cTrack.levelZ,y=cTrack.a[1];
+       box(left.x,right.x,y-320,y+320,top-620,top,['#748f92','#5d777b','#9aafb0']);
+     }
+   }
    for(const track of runways){const x0=Math.min(track.a[0],track.b[0]),x1=Math.max(track.a[0],track.b[0]),y=track.a[1];box(x0,x1,y-90,y+90,track.levelZ,track.levelZ+140,['#4c6067','#354951','#91a6aa']);}
    const beam=(a:V3,b:V3,color='#d9a744',width=2)=>craneLines.push({a,b,color,width});
    for(const item of equipment){if(item.type==='overhead'){const z=item.supportLevelZ??supportZ,[y0,y1]=item.yRange||[item.y-8400,item.y+8400];box(item.x-850,item.x+850,y0-520,y0+520,z,z+420,['#9a552f','#794022','#be8050']);box(item.x-850,item.x+850,y1-520,y1+520,z,z+420,['#9a552f','#794022','#be8050']);box(item.x-480,item.x+480,y0,y1,z+420,z+980,['#d27b3f','#a9552f','#f0a15d']);box(item.x-900,item.x+900,item.y-700,item.y+700,z+980,z+1510,['#354c59','#243843','#647b83']);beam(base(item.x,item.y,z+980),base(item.x,item.y,2600),'#243b47',2);beam(base(item.x-550,item.y,2200),base(item.x+550,item.y,2200),'#243b47',3);}else{const z=27800;for(const dy of [-680,680])for(const dx of [-680,680]){beam(base(item.x+dx,item.y+dy,700),base(item.x+dx,item.y+dy,z),'#526b70',2);for(let level=4200;level<z;level+=4200){beam(base(item.x+dx,item.y+dy,level),base(item.x-dx,item.y-dy,level+4200),'#8eaaa8',1);beam(base(item.x+dx,item.y-dy,level),base(item.x-dx,item.y+dy,level+4200),'#8eaaa8',1);}}box(item.x-900,item.x+900,item.y-900,item.y+900,250,900,['#707c78','#4f5d5c','#aab5ad']);box(item.x-5600,item.x+22000,item.y-340,item.y+340,z,z+650,['#c58c29','#95671d','#e5b956']);box(item.x-8200,item.x-5600,item.y-420,item.y+420,z-150,z+500,['#566971','#3d5157','#74868b']);box(item.x+17500,item.x+18800,item.y-520,item.y+520,z-450,z,['#425963','#2f424a','#74858a']);beam(base(item.x+18150,item.y,z-450),base(item.x+18150,item.y,900),'#293e49',2);for(let i=0;i<8;i++){const x=item.x-5000+i*3300;beam(base(x,item.y-320,z+320),base(x,item.y+320,z+320),'#eed48b',1);}}}
